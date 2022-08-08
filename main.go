@@ -6,6 +6,7 @@ import (
 	"github.com/golang-module/carbon"
 	"holidayRemind/common"
 	"holidayRemind/holiday"
+	"holidayRemind/rss"
 	"time"
 )
 
@@ -14,15 +15,22 @@ var token = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d94ad929"
 var timezone, _ = time.LoadLocation("Asia/Shanghai")
 
 func main() {
-	holiday.CreateCalendar(calendar)
-
-	holidayRemind := gocron.NewScheduler(timezone)
-	_, err := holidayRemind.Every(1).Days().At("10:30").Do(CheckTomorrowHoliday)
+	rssCron := gocron.NewScheduler(timezone)
+	_, err := rssCron.Every(1).Days().At("18:20").Do(rss.SendRssRequest())
 	if err != nil {
 		fmt.Printf("holidayRemind Error:%v\n", err.Error())
 		return
 	}
-	holidayRemind.StartBlocking()
+	rssCron.StartAsync()
+
+	holiday.CreateCalendar(calendar)
+	holidayCron := gocron.NewScheduler(timezone)
+	_, err = holidayCron.Every(1).Days().At("10:30").Do(CheckTomorrowHoliday)
+	if err != nil {
+		fmt.Printf("holidayRemind Error:%v\n", err.Error())
+		return
+	}
+	holidayCron.StartBlocking()
 }
 
 func CheckTomorrowHoliday() {

@@ -1,0 +1,9 @@
+stages:
+    - publish
+publish_job:
+    stage: publish
+    only:
+        - master
+    script:
+        - cp -r ./* /root/holidayRemind
+        - pm2 restart holidayRemind

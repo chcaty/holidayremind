@@ -15,13 +15,14 @@ var token = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d94ad929"
 var timezone, _ = time.LoadLocation("Asia/Shanghai")
 
 func main() {
+	var err error
 	rssCron := gocron.NewScheduler(timezone)
-	_, err := rssCron.Every(1).Days().At("18:20").Do(rss.SendRssRequest())
+	_, err = rssCron.Every(1).Days().At("22:45").Do(rss.SendRssRequest)
 	if err != nil {
-		fmt.Printf("holidayRemind Error:%v\n", err.Error())
+		fmt.Printf("rss Error:%v\n", err.Error())
 		return
 	}
-	rssCron.StartAsync()
+	rssCron.StartBlocking()
 
 	holiday.CreateCalendar(calendar)
 	holidayCron := gocron.NewScheduler(timezone)

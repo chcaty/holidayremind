@@ -32,19 +32,19 @@ func SendRssRequest() error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Response Body: %+v\n", string(body))
+		//fmt.Printf("Response Body: %+v\n", string(body))
 		sspaiRss := &common.Rss{}
 		err = xml.Unmarshal(body, sspaiRss)
 		if err != nil {
 			return err
 		}
-		fmt.Printf("rss: %v\n", sspaiRss)
+		//fmt.Printf("rss: %v\n", sspaiRss)
 		sspaiChannel := sspaiRss.Channel
-		contect := ""
+		content := ""
 		for _, item := range sspaiChannel.Item {
-			contect += fmt.Sprintf(ReqRssContent, item.Title, item.Link, item.Description)
+			content += fmt.Sprintf(ReqRssContent, item.Title, item.Link, item.Description)
 		}
-		text := fmt.Sprintf(ReqRssMD, sspaiChannel.Title, contect)
+		text := fmt.Sprintf(ReqRssMD, sspaiChannel.Title, content)
 		message := &common.Message{
 			Title:    sspaiChannel.Title + "今日推送",
 			Text:     text,
@@ -52,6 +52,7 @@ func SendRssRequest() error {
 			Tel:      "",
 			IsRemind: false,
 		}
+		//fmt.Printf("Message %v\n", *message)
 		_, err = holiday.CommonSendMessage(*message)
 		if err != nil {
 			fmt.Printf("sendMessage Error:%v\n", err.Error())

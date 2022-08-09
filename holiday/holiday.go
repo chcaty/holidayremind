@@ -6,6 +6,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/golang-module/carbon"
 	"holidayRemind/common"
+	"holidayRemind/dingtalk"
 	"os"
 	"strconv"
 	"time"
@@ -47,7 +48,7 @@ func CheckTomorrowHoliday(calendar map[string]DayProperty, token string) {
 				IsRemind: false,
 			}
 			if value.IsHoliday {
-				_, err := CommonSendMessage(*message)
+				_, err := dingtalk.SendMessage(*message)
 				if err != nil {
 					fmt.Printf("sendMessage Error:%v\n", err.Error())
 					return

@@ -10,3 +10,10 @@ const ReqRssContent = `
 ##### [%s](%s)
 > %s
 `
+
+type Channel int
+
+const (
+	Sspai Channel = iota
+	Zztt
+)

@@ -13,15 +13,15 @@ var calendar = map[string]holiday.DayProperty{}
 var token = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d94ad929"
 
 func main() {
-	rss.SendRssRequest(token)
+	//rss.ZzttRssRequest(token)
 	var err error
 	rssCron := gocron.NewScheduler(timezone)
-	_, err = rssCron.Every(1).Days().At("15:30").Do(rss.SendRssRequest, token)
+	_, err = rssCron.Every(1).Days().At("15:30").Do(rss.SspaiRssRequest, token)
 	if err != nil {
 		fmt.Printf("rss Error:%v\n", err.Error())
 		return
 	}
-	rssCron.StartBlocking()
+	rssCron.StartAsync()
 
 	holiday.CreateCalendar(calendar)
 	holidayCron := gocron.NewScheduler(timezone)

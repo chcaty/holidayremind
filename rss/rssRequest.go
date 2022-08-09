@@ -4,22 +4,40 @@ import (
 	"encoding/xml"
 	"fmt"
 	"holidayRemind/common"
-	"holidayRemind/holiday"
+	"holidayRemind/dingtalk"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
 )
 
-func SendRssRequest(token string) error {
-	rssReq, err := http.NewRequest("GET",
-		"https://sspai.com/feed", nil)
+func SspaiRssRequest(token string) {
+	rss := common.Rss{}
+	err := getRssInfo("https://sspai.com/feed", &rss, Sspai)
+	if err != nil {
+		fmt.Printf("getRssInfo Error:%v\n", err.Error())
+		return
+	}
+	sendRssMessage(&rss.Channel, token)
+}
+
+func ZzttRssRequest(token string) {
+	rss := common.Rss{}
+	err := getRssInfo("https://zztt15.com/feed", &rss, Zztt)
+	if err != nil {
+		fmt.Printf("getRssInfo Error:%v\n", err.Error())
+		return
+	}
+	sendRssMessage(&rss.Channel, token)
+}
+
+func getRssInfo(url string, rss *common.Rss, channelType Channel) error {
+	rssReq, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return err
 	}
-	rssReq.Header.Set("Content-Type", "application/xml; charset=UTF-8")
-
 	params := rssReq.URL.Query()
+	rssReq.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
 	rssReq.URL.RawQuery = params.Encode()
 
 	rssResp, err := http.DefaultClient.Do(rssReq)
@@ -32,39 +50,56 @@ func SendRssRequest(token string) error {
 		if err != nil {
 			return err
 		}
-		//fmt.Printf("Response Body: %+v\n", string(body))
-		sspaiRss := &common.Rss{}
-		err = xml.Unmarshal(body, sspaiRss)
+		err = xml.Unmarshal(body, rss)
 		if err != nil {
 			return err
 		}
-		//fmt.Printf("rss: %v\n", sspaiRss)
-		sspaiChannel := sspaiRss.Channel
-		content := ""
-		for _, item := range sspaiChannel.Item {
-			getDescription(&item.Description)
-			content += fmt.Sprintf(ReqRssContent, item.Title, item.Link, item.Description)
-		}
-		text := fmt.Sprintf(ReqRssMD, sspaiChannel.Title, content)
-		message := &common.Message{
-			Title:    sspaiChannel.Title + "今日推送",
-			Text:     text,
-			Token:    token,
-			Tel:      "",
-			IsRemind: false,
-		}
-		//fmt.Printf("Message %v\n", *message)
-		_, err = holiday.CommonSendMessage(*message)
-		if err != nil {
-			fmt.Printf("sendMessage Error:%v\n", err.Error())
-			return err
+		channel := rss.Channel
+		for i := 0; i < len(channel.Item); i++ {
+			if channelType == Sspai {
+				cleanSspaiDescription(&channel.Item[i].Description)
+			}
+			if channelType == Zztt {
+				cleanZzttInfo(&channel.Item[i], &channel, i)
+			}
 		}
 	}
 	return nil
 }
 
-func getDescription(description *string) {
+func cleanZzttInfo(item *common.Item, channel *common.Channel, i int) {
+	if item.Title == "黑料不打烊—精选专区" || item.Title == "." {
+		channel.Item = append(channel.Item[:i], channel.Item[i+1:]...)
+		i-- // form the remove item index to start iterate next item
+	} else {
+		item.Description = strings.Replace(item.Description, "萝莉约啪 成人抖阴 色漫肉番学生援交 B站约炮 偷窥视频", "", -1)
+	}
+}
+
+func sendRssMessage(channel *common.Channel, token string) {
+	content := ""
+	for _, item := range channel.Item {
+		content += fmt.Sprintf(ReqRssContent, item.Title, item.Link, item.Description)
+	}
+	text := fmt.Sprintf(ReqRssMD, channel.Title, content)
+	message := &common.Message{
+		Title:    channel.Title + "今日推送",
+		Text:     text,
+		Token:    token,
+		Tel:      "",
+		IsRemind: false,
+	}
+	_, err := dingtalk.SendMessage(*message)
+	if err != nil {
+		fmt.Printf("sendMessage Error:%v\n", err.Error())
+	}
+}
+
+func cleanSspaiDescription(description *string) {
 	reg := regexp.MustCompile(`.*<a`)
-	*description = reg.FindAllString(*description, -1)[0]
-	*description = strings.Replace(*description, "<a", "", -1)
+	results := reg.FindAllString(*description, -1)
+	if results != nil {
+		*description = reg.FindAllString(*description, -1)[0]
+		*description = strings.Replace(*description, "<a", "", -1)
+	}
 }

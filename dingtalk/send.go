@@ -3,9 +3,20 @@ package dingtalk
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"holidayRemind/common"
 	"net/http"
 )
+
+func SendMessage(msg common.Message) (int, error) {
+	err := SendMdMessage(msg)
+	if err != nil {
+		fmt.Printf("SendMdMessage to DingTalk error: %s", err.Error())
+		return 500, err
+	}
+	fmt.Printf("SendMdMessage to DingTalk success: %s", msg.Text)
+	return 200, nil
+}
 
 func SendMdMessage(msg common.Message) error {
 	var title = msg.Title

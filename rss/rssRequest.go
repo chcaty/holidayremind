@@ -7,11 +7,11 @@ import (
 	"holidayRemind/holiday"
 	"io"
 	"net/http"
+	"regexp"
+	"strings"
 )
 
-var token = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d94ad929"
-
-func SendRssRequest() error {
+func SendRssRequest(token string) error {
 	rssReq, err := http.NewRequest("GET",
 		"https://sspai.com/feed", nil)
 	if err != nil {
@@ -42,6 +42,7 @@ func SendRssRequest() error {
 		sspaiChannel := sspaiRss.Channel
 		content := ""
 		for _, item := range sspaiChannel.Item {
+			getDescription(&item.Description)
 			content += fmt.Sprintf(ReqRssContent, item.Title, item.Link, item.Description)
 		}
 		text := fmt.Sprintf(ReqRssMD, sspaiChannel.Title, content)
@@ -60,4 +61,10 @@ func SendRssRequest() error {
 		}
 	}
 	return nil
+}
+
+func getDescription(description *string) {
+	reg := regexp.MustCompile(`.*<a`)
+	*description = reg.FindAllString(*description, -1)[0]
+	*description = strings.Replace(*description, "<a", "", -1)
 }

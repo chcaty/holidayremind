@@ -3,7 +3,9 @@ package holiday
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-co-op/gocron"
 	"github.com/golang-module/carbon"
+	"holidayRemind/common"
 	"os"
 	"strconv"
 	"time"
@@ -20,6 +22,47 @@ type DayProperty struct {
 }
 
 var nowCarbon = carbon.Time2Carbon(time.Now())
+var timezone, _ = time.LoadLocation("Asia/Shanghai")
+
+func CheckTomorrowHoliday(calendar map[string]DayProperty, token string) {
+	now := carbon.Now().ToDateString()
+	if today, ok := calendar[now]; ok {
+		tomorrow := carbon.Tomorrow().ToDateString()
+		if value, ok := calendar[tomorrow]; ok {
+			title, text := "", ""
+			if !today.IsHoliday && value.IsHoliday {
+				title = "放假通知"
+				text = fmt.Sprintf(ReqHolidayMD, value.Description)
+			} else if today.IsHoliday && !value.IsHoliday {
+				title = "上班提醒"
+				text = ReqWorkMD
+			} else {
+				return
+			}
+			message := &common.Message{
+				Title:    title,
+				Text:     text,
+				Token:    token,
+				Tel:      "",
+				IsRemind: false,
+			}
+			if value.IsHoliday {
+				_, err := CommonSendMessage(*message)
+				if err != nil {
+					fmt.Printf("sendMessage Error:%v\n", err.Error())
+					return
+				}
+			} else {
+				workRemind := gocron.NewScheduler(timezone)
+				_, err := workRemind.At("18:00").Do(CheckTomorrowHoliday)
+				if err != nil {
+					fmt.Printf("workRemind Error:%v\n", err.Error())
+				}
+				workRemind.StartBlocking()
+			}
+		}
+	}
+}
 
 func GetHolidayConfig(holidayConfig *holidayConfig) {
 	file, err := os.ReadFile("./json/holiday" + strconv.Itoa(nowCarbon.Year()) + ".json")

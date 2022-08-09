@@ -17,7 +17,7 @@ var timezone, _ = time.LoadLocation("Asia/Shanghai")
 func main() {
 	var err error
 	rssCron := gocron.NewScheduler(timezone)
-	_, err = rssCron.Every(30).Seconds().Do(rss.SendRssRequest)
+	_, err = rssCron.Every(1).Days().At("15:30").Do(rss.SendRssRequest)
 	if err != nil {
 		fmt.Printf("rss Error:%v\n", err.Error())
 		return

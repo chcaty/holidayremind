@@ -66,7 +66,7 @@ func CheckTomorrowHoliday(calendar map[string]DayProperty, token string) {
 }
 
 func GetHolidayConfig(holidayConfig *holidayConfig) {
-	file, err := os.ReadFile("./json/holiday" + strconv.Itoa(nowCarbon.Year()) + ".json")
+	file, err := os.ReadFile("./holiday/json/holiday" + strconv.Itoa(nowCarbon.Year()) + ".json")
 	if err != nil {
 		fmt.Printf("get holiday%s.json file fail. error: %s", strconv.Itoa(nowCarbon.Year()), err.Error())
 	}

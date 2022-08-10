@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"holidayRemind/common"
 	"holidayRemind/dingtalk"
+	"holidayRemind/smtp"
 	"io"
 	"net/http"
 	"regexp"
+	"sort"
 	"strings"
 )
 
@@ -19,11 +21,12 @@ func SspaiRssRequest(token string) {
 		return
 	}
 	sendRssMessage(&rss.Channel, token)
+	sendRssEmail(&rss.Channel)
 }
 
 func ZzttRssRequest(token string) {
 	rss := common.Rss{}
-	err := getRssInfo("https://zztt15.com/feed", &rss, Zztt)
+	err := getRssInfo("https://855.fun/feed", &rss, Zztt)
 	if err != nil {
 		fmt.Printf("getRssInfo Error:%v\n", err.Error())
 		return
@@ -54,25 +57,38 @@ func getRssInfo(url string, rss *common.Rss, channelType Channel) error {
 		if err != nil {
 			return err
 		}
-		channel := rss.Channel
-		for i := 0; i < len(channel.Item); i++ {
+		sort.SliceStable(rss.Channel.Item, func(i, j int) bool {
+			return rss.Channel.Item[i].PubDate > rss.Channel.Item[j].PubDate
+		})
+		for i := 0; i < len(rss.Channel.Item); i++ {
 			if channelType == Sspai {
-				cleanSspaiDescription(&channel.Item[i].Description)
+				cleanSspaiDescription(&rss.Channel.Item[i].Description)
 			}
 			if channelType == Zztt {
-				cleanZzttInfo(&channel.Item[i], &channel, i)
+				cleanZzttInfo(&rss.Channel.Item[i], &rss.Channel, &i)
 			}
 		}
 	}
 	return nil
 }
 
-func cleanZzttInfo(item *common.Item, channel *common.Channel, i int) {
-	if item.Title == "黑料不打烊—精选专区" || item.Title == "." {
-		channel.Item = append(channel.Item[:i], channel.Item[i+1:]...)
-		i-- // form the remove item index to start iterate next item
+func cleanZzttInfo(item *common.Item, channel *common.Channel, i *int) {
+	if item.Title == "黑料不打烊—精选专区" || item.Title == "." || item.Title == ".   " {
+		channel.Item = append(channel.Item[:*i], channel.Item[*i+1:]...)
+		// form the remove item index to start iterate next item
+		*i--
 	} else {
-		item.Description = strings.Replace(item.Description, "萝莉约啪 成人抖阴 色漫肉番学生援交 B站约炮 偷窥视频", "", -1)
+		reg, _ := regexp.Compile("萝莉约啪.*偷窥视频")
+		item.Description = reg.ReplaceAllString(item.Description, "")
+	}
+}
+
+func cleanSspaiDescription(description *string) {
+	reg := regexp.MustCompile(`.*<a`)
+	results := reg.FindAllString(*description, -1)
+	if results != nil {
+		*description = reg.FindAllString(*description, -1)[0]
+		*description = strings.Replace(*description, "<a", "", -1)
 	}
 }
 
@@ -95,11 +111,20 @@ func sendRssMessage(channel *common.Channel, token string) {
 	}
 }
 
-func cleanSspaiDescription(description *string) {
-	reg := regexp.MustCompile(`.*<a`)
-	results := reg.FindAllString(*description, -1)
-	if results != nil {
-		*description = reg.FindAllString(*description, -1)[0]
-		*description = strings.Replace(*description, "<a", "", -1)
+func sendRssEmail(channel *common.Channel) {
+	body := ""
+	getEmailBody(channel, &body)
+	err := smtp.SendEmail(channel.Title+"推送", body, nil)
+	if err != nil {
+		fmt.Printf("sendMessage Error:%v\n", err.Error())
 	}
+}
+
+func getEmailBody(channel *common.Channel, body *string) {
+	title := fmt.Sprintf(smtp.EmailBodyTitle, channel.Title)
+	content := ""
+	for _, item := range channel.Item {
+		content += fmt.Sprintf(smtp.EmailBodyContent, item.PubDate, item.Link, item.Title, item.Description)
+	}
+	*body = fmt.Sprintf(smtp.EmailBody, title, content)
 }

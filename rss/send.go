@@ -25,7 +25,7 @@ func sendRssMessage(channel *Channel, token string) {
 	}
 }
 
-func sendRssEmail(channel *Channel) {
+func sendRssEmail(channel *Channel, receiver []string) {
 	body := ""
 	getEmailBody(channel, &body)
 	err := smtp.SendEmail(channel.Title+"推送", body, nil, receiver)

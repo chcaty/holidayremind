@@ -26,4 +26,13 @@ type RequestConfig struct {
 	Url        string
 	IsDingTalk bool
 	IsEmail    bool
+	Receiver   []string
 }
+
+type ChannelType int
+
+const (
+	Sspai ChannelType = iota
+	Zztt
+	Appin
+)

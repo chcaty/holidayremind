@@ -23,7 +23,7 @@ func Request(configs []RequestConfig, token string) {
 			sendRssMessage(&rss.Channel, token)
 		}
 		if config.IsEmail {
-			sendRssEmail(&rss.Channel)
+			sendRssEmail(&rss.Channel, config.Receiver)
 		}
 	}
 }

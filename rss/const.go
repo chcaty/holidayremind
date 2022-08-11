@@ -57,19 +57,13 @@ const emailBodyContent = `
 </div>
 `
 
-type ChannelType int
-
-const (
-	Sspai ChannelType = iota
-	Zztt
-)
-
 var receiver = []string{
 	//"chenzuo@hotmail.com",
 	"1120873075@qq.com",
 }
 
 var Configs = []RequestConfig{
-	{Url: "https://sspai.com", IsDingTalk: true, IsEmail: true},
+	{Url: "https://sspai.com", IsDingTalk: true, IsEmail: true, Receiver: receiver},
+	{Url: "https://www.appinn.com", IsDingTalk: true, IsEmail: true, Receiver: receiver},
 	//{Url: "https://855.fun",IsDingTalk: false,IsEmail: false},
 }

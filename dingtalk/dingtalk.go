@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-func SendMessage(msg common.Message) (int, error) {
-	err := SendMdMessage(msg)
+func SendMessage(msg Message) (int, error) {
+	err := sendMdMessage(msg)
 	if err != nil {
 		fmt.Printf("SendMdMessage to DingTalk error: %s", err.Error())
 		return 500, err
@@ -18,13 +18,13 @@ func SendMessage(msg common.Message) (int, error) {
 	return 200, nil
 }
 
-func SendMdMessage(msg common.Message) error {
+func sendMdMessage(msg Message) error {
 	var title = msg.Title
 	var At AtParams
 	if msg.IsRemind {
 		title = title + "@" + msg.Tel
 		At = AtParams{
-			IsAtAll:   false,
+			IsAtAll:   msg.IsRemindAll,
 			AtMobiles: []string{msg.Tel},
 		}
 	}

@@ -9,7 +9,7 @@ import (
 
 var pool *email.Pool
 
-func SendEmail(subject, body string, attachment []string) error {
+func SendEmail(subject, body string, attachment []string, receiver []string) error {
 	var err error
 	if pool == nil {
 		pool, err = email.NewPool(Smtp.Host+":"+Smtp.Port, Smtp.MaxClient, smtp.PlainAuth("", Smtp.UserName, Smtp.Password, Smtp.Host))
@@ -20,7 +20,7 @@ func SendEmail(subject, body string, attachment []string) error {
 	}
 	e := &email.Email{
 		From:    Smtp.UserName,
-		To:      Receiver,
+		To:      receiver,
 		Subject: subject,
 		HTML:    []byte(body),
 	}
@@ -31,7 +31,7 @@ func SendEmail(subject, body string, attachment []string) error {
 				if err != nil {
 					return err
 				}
-				time.Sleep(time.Second * 1)
+				time.Sleep(time.Second * 10)
 			}
 		}
 	}

@@ -1,27 +1,17 @@
-package smtp
+package rss
 
-type SmtpConfig struct {
-	Host      string
-	Port      string
-	UserName  string
-	Password  string
-	MaxClient int
-}
+const reqRssMD = `### 摸鱼机器人提醒你
 
-var Smtp = SmtpConfig{
-	Host:      "smtp.163.com",
-	Port:      "25",
-	UserName:  "chcaty@163.com",
-	Password:  "LVAULLJARBXIKAAC",
-	MaxClient: 5,
-}
+#### %s
+%s
+`
 
-var Receiver = []string{
-	//"chenzuo@hotmail.com",
-	"1120873075@qq.com",
-}
+const reqRssContent = `
+##### [%s](%s)
+> %s
+`
 
-const EmailBody = `
+const emailBody = `
 <div
     style="
       display: flex;
@@ -39,11 +29,11 @@ const EmailBody = `
     </div>
 </div>`
 
-const EmailBodyTitle = `
+const emailBodyTitle = `
 <h2 style="margin: 25px;">%s</h2>
 `
 
-const EmailBodyContent = `
+const emailBodyContent = `
  <div style="margin: 25px;">
 	<p style="
 		color: #999999;
@@ -66,3 +56,20 @@ const EmailBodyContent = `
 	<div>%s</div>
 </div>
 `
+
+type ChannelType int
+
+const (
+	Sspai ChannelType = iota
+	Zztt
+)
+
+var receiver = []string{
+	//"chenzuo@hotmail.com",
+	"1120873075@qq.com",
+}
+
+var Configs = []RequestConfig{
+	{Url: "https://sspai.com", IsDingTalk: true, IsEmail: true},
+	//{Url: "https://855.fun",IsDingTalk: false,IsEmail: false},
+}

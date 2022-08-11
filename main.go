@@ -15,7 +15,7 @@ var token = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d94ad929"
 func main() {
 	var err error
 	rssCron := gocron.NewScheduler(timezone)
-	_, err = rssCron.Every(1).Days().At("10:30;15:30").Do(rss.SspaiRssRequest, token)
+	_, err = rssCron.Every(1).Days().At("10:30;15:30").Do(rss.Request, rss.Configs, token)
 	if err != nil {
 		fmt.Printf("rss Error:%v\n", err.Error())
 		return

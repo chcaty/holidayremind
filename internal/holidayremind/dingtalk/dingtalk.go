@@ -4,21 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"holidayRemind/common"
+	"holidayRemind/internal/pkg"
 	"net/http"
 )
 
-func SendMessage(msg Message) (int, error) {
-	err := sendMdMessage(msg)
-	if err != nil {
-		fmt.Printf("SendMdMessage to DingTalk error: %s", err.Error())
-		return 500, err
-	}
-	fmt.Printf("SendMdMessage to DingTalk success: %s", msg.Text)
-	return 200, nil
-}
-
-func sendMdMessage(msg Message) error {
+func SendMdMessage(msg Message) error {
 	var title = msg.Title
 	var At AtParams
 	if msg.IsRemind {
@@ -38,17 +28,16 @@ func sendMdMessage(msg Message) error {
 	}
 
 	// 输出拼接好的字符串
-	println(common.MapToJson(message))
+	println(pkg.MapToJson(message))
 	var payloadBytes, err = json.Marshal(message)
 	if err != nil {
-		return err
+		return fmt.Errorf("get message []btye fail. error: %w", err)
 	}
 	body := bytes.NewReader(payloadBytes)
 
-	dingReq, err := http.NewRequest("POST",
-		"https://oapi.dingtalk.com/robot/send", body)
+	dingReq, err := http.NewRequest("POST", "https://oapi.dingtalk.com/robot/send", body)
 	if err != nil {
-		return err
+		return fmt.Errorf("get request fail. error: %w", err)
 	}
 	dingReq.Header.Set("Content-Type", "application/json")
 
@@ -58,10 +47,10 @@ func sendMdMessage(msg Message) error {
 
 	dingResp, err := http.DefaultClient.Do(dingReq) // 发送请求到钉钉
 	if err != nil {
-		return err
+		return fmt.Errorf("request fail. error: %w", err)
 	}
 	if dingResp != nil {
-		defer common.CloseBody(dingResp.Body)
+		defer pkg.CloseBody(dingResp.Body)
 	}
 	return nil
 }

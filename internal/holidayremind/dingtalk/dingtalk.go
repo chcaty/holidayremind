@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+// SendMdMessage 发送钉钉机器人Markdown消息
 func SendMdMessage(msg Message) error {
 	var title = msg.Title
 	var At AtParams

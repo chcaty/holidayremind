@@ -1,4 +1,6 @@
-package rss
+package service
+
+import "time"
 
 const reqRssMD = `### 摸鱼机器人提醒你
 
@@ -57,13 +59,16 @@ const emailBodyContent = `
 </div>
 `
 
-var receiver = []string{
-	//"chenzuo@hotmail.com",
-	"1120873075@qq.com",
-}
+const reqHolidayMD = `### 摸鱼机器人提醒你
 
-var Configs = []RequestConfig{
-	{Url: "https://sspai.com", IsDingTalk: true, IsEmail: true, Receiver: receiver},
-	{Url: "https://www.appinn.com", IsDingTalk: true, IsEmail: true, Receiver: receiver},
-	//{Url: "https://855.fun",IsDingTalk: false,IsEmail: false},
-}
+> 最后苦逼摸鱼的一天，明天就是: **%s** 的假期了！！！
+
+`
+
+const reqWorkMD = `### 摸鱼机器人提醒你
+
+> 明天就要苦逼的摸鱼，今天是最后的疯狂！！！
+
+`
+
+var timezone, _ = time.LoadLocation("Asia/Shanghai")

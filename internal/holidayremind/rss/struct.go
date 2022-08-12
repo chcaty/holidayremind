@@ -22,17 +22,7 @@ type Item struct {
 	PubDate     string   `xml:"pubDate"`
 }
 
-type RequestConfig struct {
-	Url        string
-	IsDingTalk bool
-	IsEmail    bool
-	Receiver   []string
+type RequestData struct {
+	Url         string
+	ChannelType ChannelType
 }
-
-type ChannelType int
-
-const (
-	Sspai ChannelType = iota
-	Zztt
-	Appin
-)

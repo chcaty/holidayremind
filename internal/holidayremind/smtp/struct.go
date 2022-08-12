@@ -7,3 +7,10 @@ type Config struct {
 	Password  string
 	MaxClient int
 }
+
+type EmailMessage struct {
+	Subject    string
+	Html       string
+	Attachment []string
+	Receiver   []string
+}

@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"github.com/golang-module/carbon"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -73,11 +75,20 @@ func setHoliday(property *DayProperty, currentDay string, config holidayConfig) 
 	}
 	return nil
 }
+func GetAppPath() string {
+	file, _ := exec.LookPath(os.Args[0])
+	path, _ := filepath.Abs(file)
+	index := strings.LastIndex(path, string(os.PathSeparator))
+
+	return path[:index]
+}
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {
-	pwd, _ := os.Getwd()
+	workPath, _ := os.Getwd()
+	index := strings.Index(workPath, "cmd")
+	workPath = workPath[:index]
 	fileName := "holiday" + strconv.Itoa(nowCarbon.Year()) + ".json"
-	path := filepath.Join(pwd, "internal", "holidayremind", "holiday", "json", fileName)
+	path := filepath.Join(workPath, "internal", "holidayremind", "holiday", "json", fileName)
 	fmt.Println("读取的json文件路径为:", path)
 	file, err := os.ReadFile(path)
 	if err != nil {

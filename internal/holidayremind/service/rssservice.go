@@ -12,7 +12,7 @@ import (
 func RssService() {
 	var err error
 	sspaiCron := gocron.NewScheduler(timezone)
-	_, err = sspaiCron.Every(1).Days().At("09:30;15:30").Do(sspaiRssServer)
+	_, err = sspaiCron.Every(1).Days().At("10:30;15:30").Do(sspaiRssServer)
 	if err != nil {
 		fmt.Printf("sspai rss Error:%v\n", err.Error())
 		return
@@ -20,7 +20,7 @@ func RssService() {
 	sspaiCron.StartAsync()
 
 	appinnCron := gocron.NewScheduler(timezone)
-	_, err = appinnCron.Every(1).Days().At("09:30;15:30").Do(appinnRssServer)
+	_, err = appinnCron.Every(1).Days().At("10:30;15:30").Do(appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return

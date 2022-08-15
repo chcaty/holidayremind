@@ -72,3 +72,39 @@ const reqWorkMD = `### 摸鱼机器人提醒你
 `
 
 var timezone, _ = time.LoadLocation("Asia/Shanghai")
+
+const reqImageMD = `### ### 摸鱼机器人提醒你
+
+让眼睛适当休息一下
+
+![每日美图](https://bing.ioliu.cn/v1/rand?w=800&h=600)
+
+`
+
+const reqImageHtml = `
+<body>
+  <div
+    style="
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      align-content: flex-start;
+      background-color: #f1f5f9;
+      padding: 20px;
+      height: 100%;
+    "
+  >
+    <div style="align-content: center; width: 690px; background-color: #fff">
+      <h2 style="margin: 25px">美图鉴赏</h2>
+
+      <div style="margin: 25px">
+        <image
+          src=" https://bing.ioliu.cn/v1/rand?w=640&h=480&type=web&x=0&y=0"
+          alt="Bing Image"
+        />
+      </div>
+    </div>
+  </div>
+</body>
+`

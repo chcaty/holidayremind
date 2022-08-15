@@ -59,21 +59,6 @@ func appinnRssServer() error {
 	return nil
 }
 
-func bingRssServer() error {
-	var err error
-	// 获取Rss信息
-	appinnRss := rss.Rss{}
-	err = rssRequest("https://rsshub.app/bing", rss.Appinn, &appinnRss)
-	if err != nil {
-		return err
-	}
-	err = rssNotion(appinnRss.Channel, true, true)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func rssRequest(url string, rssType rss.ChannelType, responseRss *rss.Rss) error {
 	rssData := rss.RequestData{
 		Url:         url,

@@ -12,9 +12,9 @@ import (
 func BingService() {
 	var err error
 	imageCron := gocron.NewScheduler(timezone)
-	_, err = imageCron.EveryRandom(30, 90).Minute().Do(bingImageService)
+	_, err = imageCron.EveryRandom(30, 90).Minutes().Do(bingImageService)
 	if err != nil {
-		fmt.Printf("appinn rss Error:%v\n", err.Error())
+		fmt.Printf("bing service Error:%v\n", err.Error())
 		return
 	}
 	imageCron.StartAsync()
@@ -26,7 +26,7 @@ func bingImageService() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
+	fmt.Println("rss send DingTalk success at ", carbon.Now().ToDateTimeString())
 	err = sendEmail()
 	if err != nil {
 		return err

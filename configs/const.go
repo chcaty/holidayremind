@@ -9,7 +9,7 @@ const DingTalkToken = "afc3c084e0a0a7936196b6a686f9bd382dcb5859609ee58b7c234ff6d
 var (
 	SmtpConfig = smtp.Config{
 		Host:      "smtp.163.com",
-		Port:      "25",
+		Port:      "465",
 		UserName:  "chcaty@163.com",
 		Password:  "LVAULLJARBXIKAAC",
 		MaxClient: 5,

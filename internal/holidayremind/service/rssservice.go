@@ -13,7 +13,7 @@ import (
 func RssService() {
 	var err error
 	sspaiCron := gocron.NewScheduler(timezone)
-	_, err = sspaiCron.Every(1).Days().At("10:00;11:30;15:30").Do(sspaiRssServer)
+	_, err = sspaiCron.Every(1).Days().At("10:00;15:30").Do(sspaiRssServer)
 	if err != nil {
 		fmt.Printf("sspai rss Error:%v\n", err.Error())
 		return
@@ -21,7 +21,7 @@ func RssService() {
 	sspaiCron.StartAsync()
 
 	appinnCron := gocron.NewScheduler(timezone)
-	_, err = appinnCron.Every(1).Days().At("10:00;11:30;15:30").Do(appinnRssServer)
+	_, err = appinnCron.Every(1).Days().At("10:00;15:30").Do(appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return
@@ -72,25 +72,25 @@ func rssRequest(url string, rssType rss.ChannelType, responseRss *rss.Rss) error
 }
 
 func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
-	if isEmail {
-		// 发送邮件
-		sspaiEmail := smtp.EmailMessage{}
-		setRssEmail(channel, &sspaiEmail, configs.Receiver)
-		err := smtp.SendEmail(sspaiEmail, configs.SmtpConfig)
-		if err != nil {
-			return err
-		}
-		fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
-	}
 	if isDingTalk {
 		// 推送到钉钉机器人
-		sspaiMessage := dingtalk.Message{}
-		setRssMessage(channel, &sspaiMessage, configs.DingTalkToken, "")
-		err := dingtalk.SendMdMessage(sspaiMessage)
+		message := dingtalk.Message{}
+		setRssMessage(channel, &message, configs.DingTalkToken, "")
+		err := dingtalk.SendMdMessage(message)
 		if err != nil {
 			return err
 		}
 		fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
+	}
+	if isEmail {
+		// 发送邮件
+		email := smtp.EmailMessage{}
+		setRssEmail(channel, &email, configs.Receiver)
+		err := smtp.SendEmail(email, configs.SmtpConfig)
+		if err != nil {
+			return err
+		}
+		fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
 	}
 	return nil
 }

@@ -20,21 +20,19 @@ func BingService() {
 	imageCron.StartAsync()
 }
 
-func bingImageService() {
+func bingImageService() error {
 	var err error
 	err = sendDingTalk()
 	if err != nil {
-		fmt.Printf("bing Image Service Error %s\n", err)
-		return
+		return err
 	}
 	fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
 	err = sendEmail()
-
 	if err != nil {
-		fmt.Printf("bing Image Service Error %s\n", err)
-		return
+		return err
 	}
 	fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
+	return nil
 }
 
 func sendDingTalk() error {

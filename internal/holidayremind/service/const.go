@@ -73,7 +73,7 @@ const reqWorkMD = `### 摸鱼机器人提醒你
 
 var timezone, _ = time.LoadLocation("Asia/Shanghai")
 
-const reqImageMD = `### ### 摸鱼机器人提醒你
+const reqImageMD = `### 摸鱼机器人提醒你
 
 让眼睛适当休息一下
 

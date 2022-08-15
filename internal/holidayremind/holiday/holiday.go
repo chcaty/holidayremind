@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/golang-module/carbon"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -74,13 +73,6 @@ func setHoliday(property *DayProperty, currentDay string, config holidayConfig) 
 		property.IsHoliday = false
 	}
 	return nil
-}
-func GetAppPath() string {
-	file, _ := exec.LookPath(os.Args[0])
-	path, _ := filepath.Abs(file)
-	index := strings.LastIndex(path, string(os.PathSeparator))
-
-	return path[:index]
 }
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {

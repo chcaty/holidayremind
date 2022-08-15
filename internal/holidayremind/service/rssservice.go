@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/go-co-op/gocron"
+	"github.com/golang-module/carbon"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
@@ -12,7 +13,7 @@ import (
 func RssService() {
 	var err error
 	sspaiCron := gocron.NewScheduler(timezone)
-	_, err = sspaiCron.Every(1).Days().At("10:30;15:30").Do(sspaiRssServer)
+	_, err = sspaiCron.Every(1).Days().At("10:00;11:30;15:30").Do(sspaiRssServer)
 	if err != nil {
 		fmt.Printf("sspai rss Error:%v\n", err.Error())
 		return
@@ -20,7 +21,7 @@ func RssService() {
 	sspaiCron.StartAsync()
 
 	appinnCron := gocron.NewScheduler(timezone)
-	_, err = appinnCron.Every(1).Days().At("10:30;15:30").Do(appinnRssServer)
+	_, err = appinnCron.Every(1).Days().At("10:00;11:30;15:30").Do(appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return
@@ -32,11 +33,7 @@ func sspaiRssServer() error {
 	var err error
 	// 获取Rss信息
 	sspaiRss := rss.Rss{}
-	sspai := rss.RequestData{
-		Url:         "https://sspai.com/feed",
-		ChannelType: rss.Sspai,
-	}
-	err = rss.Request(sspai, &sspaiRss)
+	err = rssRequest("https://sspai.com/feed", rss.Sspai, &sspaiRss)
 	if err != nil {
 		return err
 	}
@@ -51,15 +48,38 @@ func appinnRssServer() error {
 	var err error
 	// 获取Rss信息
 	appinnRss := rss.Rss{}
-	appinn := rss.RequestData{
-		Url:         "https://appinn.com/feed",
-		ChannelType: rss.Appinn,
-	}
-	err = rss.Request(appinn, &appinnRss)
+	err = rssRequest("https://appinn.com/feed", rss.Appinn, &appinnRss)
 	if err != nil {
 		return err
 	}
 	err = rssNotion(appinnRss.Channel, true, true)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func bingRssServer() error {
+	var err error
+	// 获取Rss信息
+	appinnRss := rss.Rss{}
+	err = rssRequest("https://rsshub.app/bing", rss.Appinn, &appinnRss)
+	if err != nil {
+		return err
+	}
+	err = rssNotion(appinnRss.Channel, true, true)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func rssRequest(url string, rssType rss.ChannelType, responseRss *rss.Rss) error {
+	rssData := rss.RequestData{
+		Url:         url,
+		ChannelType: rssType,
+	}
+	err := rss.Request(rssData, responseRss)
 	if err != nil {
 		return err
 	}
@@ -75,6 +95,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
 	}
 	if isDingTalk {
 		// 推送到钉钉机器人
@@ -84,6 +105,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
 	}
 	return nil
 }

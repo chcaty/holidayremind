@@ -3,6 +3,7 @@ package rss
 import (
 	"encoding/xml"
 	"fmt"
+	"github.com/golang-module/carbon"
 	"holidayRemind/internal/pkg"
 	"io"
 	"net/http"
@@ -13,10 +14,10 @@ import (
 
 func Request(data RequestData, rss *Rss) error {
 	err := getRssInfo(rss, data.Url)
-	cleanRssInfo(rss, data.ChannelType)
 	if err != nil {
 		return err
 	}
+	cleanRssInfo(rss, data.ChannelType)
 	return nil
 }
 
@@ -46,6 +47,7 @@ func getRssInfo(rss *Rss, url string) error {
 		sort.SliceStable(rss.Channel.Item, func(i, j int) bool {
 			return rss.Channel.Item[i].PubDate > rss.Channel.Item[j].PubDate
 		})
+		fmt.Println("rss Info get success at ", carbon.Now().ToDateTimeString())
 	}
 	return nil
 }

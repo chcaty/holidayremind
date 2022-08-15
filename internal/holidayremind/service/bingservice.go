@@ -64,6 +64,5 @@ func sendEmail() error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
 	return nil
 }

@@ -12,7 +12,7 @@ import (
 func BingService() {
 	var err error
 	imageCron := gocron.NewScheduler(timezone)
-	_, err = imageCron.Every(1).Days().At("10:00;16:00").Do(bingImageService)
+	_, err = imageCron.EveryRandom(30, 90).Minute().Do(bingImageService)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return

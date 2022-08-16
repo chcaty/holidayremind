@@ -1,11 +1,9 @@
 package dingtalk
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"holidayRemind/internal/pkg"
-	"net/http"
+	"holidayRemind/internal/pkg/net"
 )
 
 // SendMdMessage 发送钉钉机器人Markdown消息
@@ -30,28 +28,11 @@ func SendMdMessage(msg Message) error {
 
 	// 输出拼接好的字符串
 	println(pkg.MapToJson(message))
-	var payloadBytes, err = json.Marshal(message)
-	if err != nil {
-		return fmt.Errorf("get message []btye fail. error: %w", err)
+	paramMap := map[string]string{
+		"access_token": msg.Token,
 	}
-	body := bytes.NewReader(payloadBytes)
-
-	dingReq, err := http.NewRequest("POST", "https://oapi.dingtalk.com/robot/send", body)
-	if err != nil {
-		return fmt.Errorf("get request fail. error: %w", err)
-	}
-	dingReq.Header.Set("Content-Type", "application/json")
-
-	params := dingReq.URL.Query()
-	params.Add("access_token", msg.Token)
-	dingReq.URL.RawQuery = params.Encode()
-
-	dingResp, err := http.DefaultClient.Do(dingReq) // 发送请求到钉钉
-	if err != nil {
-		return fmt.Errorf("request fail. error: %w", err)
-	}
-	if dingResp != nil {
-		defer pkg.CloseBody(dingResp.Body)
-	}
+	result := ""
+	net.Post("https://oapi.dingtalk.com/robot/send", message, paramMap, net.Json, &result)
+	fmt.Printf("DingTalk Response Result:%s", result)
 	return nil
 }

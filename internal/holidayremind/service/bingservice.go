@@ -3,10 +3,12 @@ package service
 import (
 	"fmt"
 	"github.com/go-co-op/gocron"
-	"github.com/golang-module/carbon"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/smtp"
+	"holidayRemind/internal/pkg/net"
+	"regexp"
+	"strings"
 )
 
 func BingService() {
@@ -21,24 +23,39 @@ func BingService() {
 }
 
 func bingImageService() error {
+	imageUrl := ""
+	getBingImage(&imageUrl)
+	content := ""
+	getSentences(&content)
 	var err error
-	err = sendDingTalk()
+	err = sendDingTalk(imageUrl, content)
 	if err != nil {
 		return err
 	}
-	fmt.Println("rss send DingTalk success at ", carbon.Now().ToDateTimeString())
-	err = sendEmail()
+	err = sendEmail(imageUrl, content)
 	if err != nil {
 		return err
 	}
-	fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
 	return nil
 }
 
-func sendDingTalk() error {
+func getBingImage(result *string) {
+	body := ""
+	net.Get("https://tuapi.eees.cc/api.php?category=biying", &body)
+	reg, _ := regexp.Compile("src=\".*\"")
+	*result = reg.FindString(body)
+	*result = strings.Replace(*result, "src=", "", -1)
+	*result = strings.Replace(*result, "\"", "", -1)
+}
+
+func getSentences(result *string) {
+	net.Get("https://v1.hitokoto.cn/?encode=text", result)
+}
+
+func sendDingTalk(imageUrl string, content string) error {
 	message := dingtalk.Message{
-		Title:       "今日美图推送",
-		Text:        reqImageMD,
+		Title:       "今日推送",
+		Text:        fmt.Sprintf(reqImageMD, content, imageUrl),
 		Token:       configs.DingTalkToken,
 		Tel:         "",
 		IsRemind:    false,
@@ -51,10 +68,10 @@ func sendDingTalk() error {
 	return nil
 }
 
-func sendEmail() error {
+func sendEmail(imageUrl string, content string) error {
 	bingImageEmail := smtp.EmailMessage{
-		Subject:    "今日美图推送",
-		Html:       reqImageHtml,
+		Subject:    "今日推送",
+		Html:       fmt.Sprintf(reqImageHtml, "%;", "%;", content, imageUrl, "%\""),
 		Attachment: nil,
 		Receiver:   configs.Receiver,
 	}

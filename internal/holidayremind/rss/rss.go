@@ -3,10 +3,7 @@ package rss
 import (
 	"encoding/xml"
 	"fmt"
-	"github.com/golang-module/carbon"
-	"holidayRemind/internal/pkg"
-	"io"
-	"net/http"
+	"holidayRemind/internal/pkg/net"
 	"regexp"
 	"sort"
 	"strings"
@@ -22,33 +19,15 @@ func Request(data RequestData, rss *Rss) error {
 }
 
 func getRssInfo(rss *Rss, url string) error {
-	rssReq, err := http.NewRequest("GET", url, nil)
+	body := ""
+	net.Get(url, &body)
+	err := xml.Unmarshal([]byte(body), rss)
 	if err != nil {
-		return err
+		return fmt.Errorf("get rss struct fail. error: %w", err)
 	}
-	params := rssReq.URL.Query()
-	rssReq.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36")
-	rssReq.URL.RawQuery = params.Encode()
-
-	rssResp, err := http.DefaultClient.Do(rssReq)
-	if err != nil {
-		return err
-	}
-	if rssResp != nil {
-		defer pkg.CloseBody(rssResp.Body)
-		body, err := io.ReadAll(rssResp.Body)
-		if err != nil {
-			return fmt.Errorf("get response body fail. error: %w", err)
-		}
-		err = xml.Unmarshal(body, rss)
-		if err != nil {
-			return fmt.Errorf("get rss struct fail. error: %w", err)
-		}
-		sort.SliceStable(rss.Channel.Item, func(i, j int) bool {
-			return rss.Channel.Item[i].PubDate > rss.Channel.Item[j].PubDate
-		})
-		fmt.Println("rss Info get success at ", carbon.Now().ToDateTimeString())
-	}
+	sort.SliceStable(rss.Channel.Item, func(i, j int) bool {
+		return rss.Channel.Item[i].PubDate > rss.Channel.Item[j].PubDate
+	})
 	return nil
 }
 

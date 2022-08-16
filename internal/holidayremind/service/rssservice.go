@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/go-co-op/gocron"
-	"github.com/golang-module/carbon"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
@@ -80,7 +79,6 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("rss send dingtalk success at ", carbon.Now().ToDateTimeString())
 	}
 	if isEmail {
 		// 发送邮件
@@ -90,7 +88,6 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("rss send email success at ", carbon.Now().ToDateTimeString())
 	}
 	return nil
 }

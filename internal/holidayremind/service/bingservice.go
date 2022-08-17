@@ -14,7 +14,7 @@ import (
 func BingService() {
 	var err error
 	imageCron := gocron.NewScheduler(timezone)
-	_, err = imageCron.EveryRandom(30, 90).Minutes().Do(bingImageService)
+	_, err = imageCron.EveryRandom(90, 180).Minutes().Do(bingImageService)
 	if err != nil {
 		fmt.Printf("bing service Error:%v\n", err.Error())
 		return

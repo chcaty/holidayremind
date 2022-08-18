@@ -1,0 +1,42 @@
+{
+  "MarkDownTemplate": [
+    {
+      "RssBody": "### %s提醒你\n\n#### %s\n%s"
+    },
+    {
+      "RssDetail": "\n##### [%s](%s) \n> %s\n"
+    },
+    {
+      "HolidayBody": "### %s提醒你\n\n> 最后苦逼摸鱼的一天，明天就是: **%s** 的假期了！！！\n\n"
+    },
+    {
+      "WorkBody": "### %s提醒你\n\n> 明天就要苦逼的摸鱼，今天是最后的疯狂！！！\n\n"
+    },
+    {
+      "ImageBody": "### %s提醒你\n\n一言\n\n%s\n\n![每日美图](%s)\n\n"
+    }
+  ],
+  "EmailTemplate": [
+    {
+      "RssBody": "<div style=\"display: flex; flex-direction: column; justify-content: flex-start; align-items: center; align-content: flex-start; background-color: #f1f5f9; padding: 20px; \"><div style=\"align-content: center; width: 45%s background-color: #fff;\">%s%s</div></div>"
+    },
+    {
+      "RssTitle": "<h2 style=\"margin: 25px;\">%s</h2>"
+    },
+    {
+      "RssDetail": "<div style=\"margin: 25px;\"><p style=\"color: #999999; font-size: 12px; font-weight: 400; margin: 0; margin-bottom: 3px; \">%s</p><h3 style=\"font-weight: 400; margin: 0\"><a href=\"%s\" rel=\"noopener\" target=\"_blank\" style=\"text-decoration: none\">%s</a></h3><div>%s</div></div>"
+    },
+    {
+      "ImageBody": "<body><div style=\"display: flex; flex-direction: column; justify-content: flex-start; align-items: center; align-content: flex-start; background-color: #f1f5f9; padding: 20px; height: 100%s\"><div style=\"align-content: center; width: 45%s background-color: #fff\"><h2 style=\"margin: 25px\">一言</h2><div style=\"margin: 25px\"><p style=\"color: #999999; font-size: 16px; font-weight: 400;\">%s</p><image src=\"%s\" alt=\"Bing Image\" width=\"100%s/></div></div></div></body>"
+    },
+    {
+      "HotTopBody": "<div style=\"display: flex; flex-direction: column; justify-content: flex-start; align-items: center; align-content: flex-start; background-color: #f1f5f9; padding: 20px; \"><div style=\"align-content: center; width: 45%s background-color: #fff; padding: 25px;\">%s%s</div></div>"
+    },
+    {
+      "HotTopTitle": "<h2>%s</h2>"
+    },
+    {
+      "HotTopDetail": "<div style=\"margin-bottom: 3px;\"><a href=\"%s\" rel=\"noopener\" target=\"_blank\" style=\"text-decoration: none; color: #333;font-weight: 400; font-size: 15px; margin:0\">%s</a><span style=\"color: #999999; font-size: 12px; font-weight: 400; \">&nbsp&nbsp%s</span></div><hr style=\"border: 0; padding-top: 1px; background: linear-gradient(to right, transparent, #d0d0d5, transparent);\" />"
+    }
+  ]
+}

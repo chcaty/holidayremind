@@ -5,11 +5,20 @@ import (
 	"fmt"
 )
 
-func MapToJson(m any) (string, error) {
-	jsonByte, err := json.Marshal(m)
+func ToJson(object any, value *string) error {
+	data, err := json.Marshal(object)
+	*value = string(data)
 	if err != nil {
-		fmt.Printf("Marshal with error: %+v\n", err)
-		return "", nil
+		return fmt.Errorf("Marshal with error: %w\n", err)
 	}
-	return string(jsonByte), nil
+	return nil
+}
+
+func ToObject(value string, object *any) error {
+	data := []byte(value)
+	err := json.Unmarshal(data, object)
+	if err != nil {
+		return fmt.Errorf("Unmarshal with error: %w\n", err)
+	}
+	return nil
 }

@@ -19,19 +19,11 @@ func Get(url string, response *string) {
 	if err != nil {
 		panic(err)
 	}
-
-	var buffer [512]byte
-	result := bytes.NewBuffer(nil)
-	for {
-		n, err := resp.Body.Read(buffer[0:])
-		result.Write(buffer[0:n])
-		if err != nil && err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
-		}
+	result, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
 	}
-	*response = result.String()
+	*response = string(result)
 	return
 }
 

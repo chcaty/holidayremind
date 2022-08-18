@@ -27,7 +27,8 @@ func SendMdMessage(msg Message) error {
 	}
 
 	// 输出拼接好的字符串
-	println(pkg.MapToJson(message))
+	messageJson := ""
+	fmt.Printf("dingtalk send message:%s", pkg.ToJson(message, &messageJson))
 	paramMap := map[string]string{
 		"access_token": msg.Token,
 	}

@@ -19,4 +19,8 @@ var (
 		//"chenzuo@hotmail.com",
 		"1120873075@qq.com",
 	}
+	HotTopReceiver = []string{
+		"chenzuo@hotmail.com",
+		"1120873075@qq.com",
+	}
 )

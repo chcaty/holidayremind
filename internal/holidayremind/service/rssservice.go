@@ -7,6 +7,7 @@ import (
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
 	"holidayRemind/internal/holidayremind/smtp"
+	"holidayRemind/internal/holidayremind/template"
 )
 
 func RssService() {
@@ -20,7 +21,7 @@ func RssService() {
 	sspaiCron.StartAsync()
 
 	appinnCron := gocron.NewScheduler(timezone)
-	_, err = appinnCron.Every(1).Days().At("10:00;15:30").Do(appinnRssServer)
+	_, err = appinnCron.Every(1).Days().At("10:30;16:00").Do(appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return
@@ -30,7 +31,6 @@ func RssService() {
 
 func sspaiRssServer() error {
 	var err error
-	// 获取Rss信息
 	sspaiRss := rss.Rss{}
 	err = rssRequest("https://sspai.com/feed", rss.Sspai, &sspaiRss)
 	if err != nil {
@@ -45,7 +45,6 @@ func sspaiRssServer() error {
 
 func appinnRssServer() error {
 	var err error
-	// 获取Rss信息
 	appinnRss := rss.Rss{}
 	err = rssRequest("https://appinn.com/feed", rss.Appinn, &appinnRss)
 	if err != nil {
@@ -71,11 +70,15 @@ func rssRequest(url string, rssType rss.ChannelType, responseRss *rss.Rss) error
 }
 
 func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
+	var err error
 	if isDingTalk {
 		// 推送到钉钉机器人
 		message := dingtalk.Message{}
-		setRssMessage(channel, &message, configs.DingTalkToken, "")
-		err := dingtalk.SendMdMessage(message)
+		err = setRssMessage(channel, &message, configs.DingTalkToken, "")
+		if err != nil {
+			return err
+		}
+		err = dingtalk.SendMdMessage(message)
 		if err != nil {
 			return err
 		}
@@ -83,8 +86,11 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	if isEmail {
 		// 发送邮件
 		email := smtp.EmailMessage{}
-		setRssEmail(channel, &email, configs.Receiver)
-		err := smtp.SendEmail(email, configs.SmtpConfig)
+		err = setRssEmail(channel, &email, configs.Receiver)
+		if err != nil {
+			return err
+		}
+		err = smtp.SendEmail(email, configs.SmtpConfig)
 		if err != nil {
 			return err
 		}
@@ -92,12 +98,20 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	return nil
 }
 
-func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string, tel string) {
+func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string, tel string) error {
+	var err error
 	content := ""
-	for _, item := range channel.Item {
-		content += fmt.Sprintf(reqRssContent, item.Title, item.Link, item.Description)
+	templateMap := map[string]string{}
+	err = template.GetTemplateList([]string{
+		"RssDetail", "RssBody",
+	}, template.Email, &templateMap)
+	if err != nil {
+		return err
 	}
-	text := fmt.Sprintf(reqRssMD, channel.Title, content)
+	for _, item := range channel.Item {
+		content += fmt.Sprintf(templateMap["RssDetail"], item.Title, item.Link, item.Description)
+	}
+	text := fmt.Sprintf(templateMap["RssBody"], "Rss通知姬", channel.Title, content)
 	message.Title = channel.Title + "今日推送"
 	message.Text = text
 	message.Token = token
@@ -105,22 +119,36 @@ func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string,
 		message.IsRemind = true
 		message.Tel = tel
 	}
+	return nil
 }
 
-func setRssEmail(channel rss.Channel, email *smtp.EmailMessage, receiver []string) {
+func setRssEmail(channel rss.Channel, email *smtp.EmailMessage, receiver []string) error {
 	body := ""
-	getEmailBody(channel, &body)
+	err := getEmailBody(channel, &body)
+	if err != nil {
+		return err
+	}
 	email.Subject = channel.Title + "推送"
 	email.Html = body
 	email.Attachment = nil
 	email.Receiver = receiver
+	return nil
 }
 
-func getEmailBody(channel rss.Channel, body *string) {
-	title := fmt.Sprintf(emailBodyTitle, channel.Title)
+func getEmailBody(channel rss.Channel, body *string) error {
+	var err error
+	templateMap := map[string]string{}
+	err = template.GetTemplateList([]string{
+		"RssTitle", "RssDetail", "RssBody",
+	}, template.Email, &templateMap)
+	if err != nil {
+		return err
+	}
+	title := fmt.Sprintf(templateMap["RssTitle"], channel.Title)
 	content := ""
 	for _, item := range channel.Item {
-		content += fmt.Sprintf(emailBodyContent, item.PubDate, item.Link, item.Title, item.Description)
+		content += fmt.Sprintf(templateMap["RssDetail"], item.PubDate, item.Link, item.Title, item.Description)
 	}
-	*body = fmt.Sprintf(emailBody, title, content)
+	*body = fmt.Sprintf(templateMap["RssBody"], "%;", title, content)
+	return nil
 }

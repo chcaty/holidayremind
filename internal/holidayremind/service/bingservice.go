@@ -6,6 +6,7 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/smtp"
+	"holidayRemind/internal/holidayremind/template"
 	"holidayRemind/internal/pkg/net"
 	"regexp"
 	"strings"
@@ -53,9 +54,11 @@ func getSentences(result *string) {
 }
 
 func sendDingTalk(imageUrl string, content string) error {
+	imageBody := ""
+	template.GetTemplate("ImageBody", template.MarkDown, &imageBody)
 	message := dingtalk.Message{
 		Title:       "今日推送",
-		Text:        fmt.Sprintf(reqImageMD, content, imageUrl),
+		Text:        fmt.Sprintf(imageBody, "发图姬", content, imageUrl),
 		Token:       configs.DingTalkToken,
 		Tel:         "",
 		IsRemind:    false,
@@ -69,9 +72,11 @@ func sendDingTalk(imageUrl string, content string) error {
 }
 
 func sendEmail(imageUrl string, content string) error {
+	imageBody := ""
+	template.GetTemplate("ImageBody", template.Email, &imageBody)
 	bingImageEmail := smtp.EmailMessage{
 		Subject:    "今日推送",
-		Html:       fmt.Sprintf(reqImageHtml, "%;", "%;", content, imageUrl, "%\""),
+		Html:       fmt.Sprintf(imageBody, "%;", "%;", content, imageUrl, "%\""),
 		Attachment: nil,
 		Receiver:   configs.Receiver,
 	}

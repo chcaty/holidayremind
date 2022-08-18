@@ -7,6 +7,7 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/holiday"
+	"holidayRemind/internal/holidayremind/template"
 )
 
 func HolidayService() {
@@ -54,11 +55,15 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 
 func setHolidayMessage(message *dingtalk.Message, token string, todayFlag bool, tomorrowProp holiday.DayProperty) {
 	if !todayFlag && tomorrowProp.IsHoliday {
+		workBody := ""
+		template.GetTemplate("WorkBody", template.MarkDown, &workBody)
 		message.Title = "放假通知"
-		message.Tel = fmt.Sprintf(reqHolidayMD, tomorrowProp.Description)
+		message.Text = fmt.Sprintf(workBody, "假期提醒姬", tomorrowProp.Description)
 	} else if todayFlag && !tomorrowProp.IsHoliday {
+		holidayBody := ""
+		template.GetTemplate("HolidayBody", template.MarkDown, &holidayBody)
 		message.Title = "上班提醒"
-		message.Tel = reqWorkMD
+		message.Text = fmt.Sprintf(holidayBody, "上班摸鱼姬")
 	}
 	message.Token = token
 }

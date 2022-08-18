@@ -1,14 +1,10 @@
 package holiday
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/golang-module/carbon"
-	"os"
-	"path/filepath"
+	"holidayRemind/internal/pkg"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -76,19 +72,10 @@ func setHoliday(property *DayProperty, currentDay string, config holidayConfig) 
 }
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {
-	workPath, _ := os.Getwd()
-	index := strings.Index(workPath, "cmd")
-	workPath = workPath[:index]
-	fileName := "holiday" + strconv.Itoa(nowCarbon.Year()) + ".json"
-	path := filepath.Join(workPath, "internal", "holidayremind", "holiday", "json", fileName)
-	fmt.Println("读取的json文件路径为:", path)
-	file, err := os.ReadFile(path)
+	fileName := "holiday" + strconv.Itoa(nowCarbon.Year())
+	err := pkg.GetConfigByJson(fileName, holidayConfig)
 	if err != nil {
-		return fmt.Errorf("get %s file fail. error: %w", fileName, err)
-	}
-	err = json.Unmarshal(file, &holidayConfig)
-	if err != nil {
-		return fmt.Errorf("get holidayConfig struct fail. error: %w", err)
+		return err
 	}
 	return nil
 }

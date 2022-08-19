@@ -3,64 +3,121 @@ package net
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
-	"time"
 )
 
-// Get 发送GET请求
-// url:请求地址
-// response:请求返回的内容
-func Get(url string, response *string) {
-	client := http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get(url)
-	defer CloseBody(resp.Body)
+// Get http get method
+func Get(response *[]byte, data RequestBaseData) error {
+	//new request
+	req, err := http.NewRequest("GET", data.Url, nil)
 	if err != nil {
-		panic(err)
+		return errors.New("new request is fail ")
 	}
-	result, err := io.ReadAll(resp.Body)
+	//add params
+	q := req.URL.Query()
+	if data.Params != nil {
+		for key, val := range data.Params {
+			q.Add(key, val)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+	//add headers
+	if data.Headers != nil {
+		for key, val := range data.Headers {
+			req.Header.Add(key, val)
+		}
+	}
+	//http client
+	client := &http.Client{}
+	log.Printf("Go GET URL : %s \n", req.URL.String())
+
+	//傳送請求
+	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	*response = string(result)
-	return
+	//一定要關閉res.Body
+	defer closeBody(&res.Body)
+	//讀取body
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	*response = resBody
+	return nil
 }
 
-// Post 发送POST请求
-// url:请求地址，body:POST请求提交的数据,param:POST请求url param数据,contentType:请求体格式，如：application/json,content:请求放回的内容
-func Post(url string, body interface{}, param map[string]string, contentType ContentType, content *string) {
-	jsonStr, _ := json.Marshal(body)
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	req.Header.Add("content-type", string(contentType))
+// Post http post method
+func Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error {
+	//add post body
+	var bodyJson []byte
+	var req *http.Request
+	if body != nil {
+		var err error
+		bodyJson, err = json.Marshal(body)
+		if err != nil {
+			return errors.New("http post body to json failed")
+		}
+	}
+	req, err := http.NewRequest("POST", data.Url, bytes.NewBuffer(bodyJson))
 	if err != nil {
-		panic(err)
+		return errors.New("new request is fail: %v \n")
 	}
-	defer CloseBody(req.Body)
-
-	params := req.URL.Query()
-	for i, v := range param {
-		params.Add(i, v)
+	//add params
+	q := req.URL.Query()
+	if data.Params != nil {
+		for key, val := range data.Params {
+			q.Add(key, val)
+		}
+		req.URL.RawQuery = q.Encode()
 	}
-	req.URL.RawQuery = params.Encode()
+	//add headers
+	if data.Headers != nil {
+		for key, val := range data.Headers {
+			req.Header.Add(key, val)
+		}
+	}
+	//set Content-type
+	req.Header.Set("Content-type", string(contentType))
+	//http client
+	client := &http.Client{}
+	log.Printf("Go POST URL : %s \n", req.URL.String())
 
-	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Do(req)
+	//傳送請求
+	res, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer CloseBody(resp.Body)
-
-	result, _ := io.ReadAll(resp.Body)
-	*content = string(result)
-	return
+	//一定要關閉res.Body
+	defer closeBody(&res.Body)
+	//讀取body
+	resBody, err := io.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+	*response = resBody
+	return nil
 }
 
-func CloseBody(body io.ReadCloser) {
+// PostByJson http post method with header content-type:application/json
+func PostByJson(response *[]byte, data RequestBaseData, body any) error {
+	err := Post(response, data, Json, body)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// closeBody close response body
+func closeBody(body *io.ReadCloser) {
 	func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
 			fmt.Printf("Request Body Close error: %s", err.Error())
 		}
-	}(body)
+	}(*body)
 }

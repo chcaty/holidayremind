@@ -5,19 +5,19 @@ import (
 	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/moyudock"
+	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
 )
 
 func HotTopService() {
-	var err error
-	weiboCron := gocron.NewScheduler(timezone)
-	_, err = weiboCron.Every(1).Days().At("10:00;15:30").Do(weiboHotTopService)
+	hotTopScheduler := gocron.Scheduler{}
+	err := scheduler.SetScheduler(&hotTopScheduler, "30 10,15 * * *", weiboHotTopService)
 	if err != nil {
-		fmt.Printf("sspai rss Error:%v\n", err.Error())
+		fmt.Printf("hotTop Error:%v\n", err.Error())
 		return
 	}
-	weiboCron.StartAsync()
+	hotTopScheduler.StartAsync()
 }
 
 func weiboHotTopService() error {
@@ -27,8 +27,10 @@ func weiboHotTopService() error {
 	if err != nil {
 		return err
 	}
-	email := smtp.EmailMessage{}
-	err = setHotTopEmail(&hotTops.Data.Weibo, "微博热搜榜", &email, configs.HotTopReceiver)
+	email := smtp.SimpleEmail{
+		Receiver: configs.HotTopReceiver,
+	}
+	err = setHotTopEmail(&hotTops.Data.Weibo, "微博热搜榜", &email)
 	if err != nil {
 		return err
 	}
@@ -39,7 +41,7 @@ func weiboHotTopService() error {
 	return nil
 }
 
-func setHotTopEmail(hotTopInfos *moyudock.HotTopInfo, title string, email *smtp.EmailMessage, receiver []string) error {
+func setHotTopEmail(hotTopInfos *moyudock.HotTopInfo, title string, email *smtp.SimpleEmail) error {
 	body := ""
 	err := getHotTopEmailBody(hotTopInfos, title, &body)
 	if err != nil {
@@ -47,17 +49,16 @@ func setHotTopEmail(hotTopInfos *moyudock.HotTopInfo, title string, email *smtp.
 	}
 	email.Subject = title + "推送"
 	email.Html = body
-	email.Attachment = nil
-	email.Receiver = receiver
 	return nil
 }
 
 func getHotTopEmailBody(hotTopInfos *moyudock.HotTopInfo, title string, body *string) error {
 	var err error
 	templateMap := map[string]string{}
-	err = template.GetTemplateList([]string{
+	templateName := []string{
 		"HotTopTitle", "HotTopDetail", "HotTopBody",
-	}, template.Email, &templateMap)
+	}
+	err = template.GetTemplateList(&templateMap, templateName, template.Email)
 	if err != nil {
 		return err
 	}

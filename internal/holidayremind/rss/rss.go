@@ -19,9 +19,18 @@ func Request(data RequestData, rss *Rss) error {
 }
 
 func getRssInfo(rss *Rss, url string) error {
-	body := ""
-	net.Get(url, &body)
-	err := xml.Unmarshal([]byte(body), rss)
+	var err error
+	var resp []byte
+	requestData := net.RequestBaseData{
+		Url:     url,
+		Headers: nil,
+		Params:  net.DefaultHeader,
+	}
+	err = net.Get(&resp, requestData)
+	if err != nil {
+		return err
+	}
+	err = xml.Unmarshal(resp, rss)
 	if err != nil {
 		return fmt.Errorf("get rss struct fail. error: %w", err)
 	}
@@ -55,12 +64,12 @@ func cleanZzttInfo(channel *Channel) {
 }
 
 func cleanSspaiDescription(channel *Channel) {
-	for i := 0; i < len(channel.Item); i++ {
+	for _, item := range channel.Item {
 		reg := regexp.MustCompile(`.*<a`)
-		results := reg.FindAllString((*channel).Item[i].Description, -1)
+		results := reg.FindAllString(item.Description, -1)
 		if results != nil {
-			(*channel).Item[i].Description = reg.FindAllString((*channel).Item[i].Description, -1)[0]
-			(*channel).Item[i].Description = strings.Replace((*channel).Item[i].Description, "<a", "", -1)
+			item.Description = reg.FindAllString(item.Description, -1)[0]
+			item.Description = strings.Replace(item.Description, "<a", "", -1)
 		}
 	}
 }

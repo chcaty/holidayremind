@@ -5,44 +5,44 @@ import (
 	"holidayRemind/internal/pkg"
 )
 
-func GetTemplate(name string, templateType Type, template *string) error {
+func GetTemplate(template *string, name string, templateType Type) error {
 	config := Config{}
-	err := pkg.GetConfigByJson("messagetemplate", &config)
+	err := pkg.GetConfigByJson(&config, "messagetemplate")
 	if err != nil {
 		return err
 	}
-	err2 := getTemplateByType(name, templateType, template, config)
+	err2 := getTemplateByType(template, name, templateType, config)
 	if err2 != nil {
 		return err2
 	}
 	return nil
 }
 
-func GetTemplateList(names []string, templateType Type, templates *map[string]string) error {
+func GetTemplateList(templates *map[string]string, names []string, templateType Type) error {
 	config := Config{}
-	err := pkg.GetConfigByJson("messagetemplate", &config)
+	err := pkg.GetConfigByJson(&config, "messagetemplate")
 	if err != nil {
 		return err
 	}
 	template := ""
-	for _, s := range names {
-		err := getTemplateByType(s, templateType, &template, config)
+	for _, name := range names {
+		err := getTemplateByType(&template, name, templateType, config)
 		if err != nil {
 			return err
 		}
-		(*templates)[s] = template
+		(*templates)[name] = template
 	}
 	return nil
 }
 
-func getTemplateByType(name string, templateType Type, template *string, config Config) error {
+func getTemplateByType(template *string, name string, templateType Type, config Config) error {
 	if templateType == MarkDown {
-		err := getMapTemplate(name, config.MarkDownTemplate, template)
+		err := getMapTemplate(template, name, config.MarkDownTemplate)
 		if err != nil {
 			return err
 		}
 	} else {
-		err := getMapTemplate(name, config.EmailTemplate, template)
+		err := getMapTemplate(template, name, config.EmailTemplate)
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func getTemplateByType(name string, templateType Type, template *string, config 
 	return nil
 }
 
-func getMapTemplate(name string, config map[string]string, template *string) error {
+func getMapTemplate(template *string, name string, config map[string]string) error {
 	if value, ok := config[name]; ok {
 		*template = value
 		return nil

@@ -8,9 +8,17 @@ import (
 
 func GetHotTop(top *Response[HotTopSite]) error {
 	var err error
-	resp := ""
-	net.Get(baseUrl+"hot/all", &resp)
-	err = json.Unmarshal([]byte(resp), top)
+	var resp []byte
+	requestData := net.RequestBaseData{
+		Url:     baseUrl + "hot/all",
+		Headers: nil,
+		Params:  net.DefaultHeader,
+	}
+	err = net.Get(&resp, requestData)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp, top)
 	if err != nil {
 		return fmt.Errorf("get hottop struct fail. error: %w", err)
 	}
@@ -19,9 +27,17 @@ func GetHotTop(top *Response[HotTopSite]) error {
 
 func GetHoliday(holidayInfo *Response[Holiday]) error {
 	var err error
-	resp := ""
-	net.Get(baseUrl+"Holiday", &resp)
-	err = json.Unmarshal([]byte(resp), holidayInfo)
+	var resp []byte
+	requestData := net.RequestBaseData{
+		Url:     baseUrl + "holiday",
+		Headers: nil,
+		Params:  net.DefaultHeader,
+	}
+	err = net.Get(&resp, requestData)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp, holidayInfo)
 	if err != nil {
 		return fmt.Errorf("get holiday struct fail. error: %w", err)
 	}
@@ -30,9 +46,17 @@ func GetHoliday(holidayInfo *Response[Holiday]) error {
 
 func GetImage(imageUrl *Response[string]) error {
 	var err error
-	resp := ""
-	net.Get(baseUrl+"Holiday", &resp)
-	err = json.Unmarshal([]byte(resp), imageUrl)
+	var resp []byte
+	requestData := net.RequestBaseData{
+		Url:     baseUrl + "random/xiezhen",
+		Headers: nil,
+		Params:  net.DefaultHeader,
+	}
+	err = net.Get(&resp, requestData)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(resp, imageUrl)
 	if err != nil {
 		return fmt.Errorf("get image struct fail. error: %w", err)
 	}

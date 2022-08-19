@@ -24,15 +24,15 @@ type HolidayDay struct {
 
 // HotTopSite 热点平台列表
 type HotTopSite struct {
-	Zhihu    HotTopInfo `json:"zhihu"`
-	Douyin   HotTopInfo `json:"douyin"`
+	ZhiHu    HotTopInfo `json:"zhihu"`
+	DouYin   HotTopInfo `json:"douyin"`
 	Weibo    HotTopInfo `json:"weibo"`
 	Baidu    HotTopInfo `json:"baidu"`
-	Bilibili HotTopInfo `json:"bilibili"`
+	BiliBili HotTopInfo `json:"bilibili"`
 	History  HotTopInfo `json:"history"`
-	Tieba    HotTopInfo `json:"tieba"`
-	Toutiao  HotTopInfo `json:"toutiao"`
-	pojie52  HotTopInfo `json:"pojie52"`
+	TieBa    HotTopInfo `json:"tieba"`
+	TouTiao  HotTopInfo `json:"toutiao"`
+	PoJie52  HotTopInfo `json:"pojie52"`
 }
 
 // HotTopInfo 热点信息列表

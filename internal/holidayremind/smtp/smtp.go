@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func SendEmail(message EmailMessage, config Config) error {
+func SendEmail(message SimpleEmail, config Config) error {
 	var err error
 	e := &email.Email{
 		From:    config.UserName,

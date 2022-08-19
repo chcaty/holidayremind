@@ -6,27 +6,28 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
+	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
 )
 
 func RssService() {
 	var err error
-	sspaiCron := gocron.NewScheduler(timezone)
-	_, err = sspaiCron.Every(1).Days().At("10:00;15:30").Do(sspaiRssServer)
+	sspaiScheduler := gocron.Scheduler{}
+	err = scheduler.SetScheduler(&sspaiScheduler, "30 10,15 * * *", sspaiRssServer)
 	if err != nil {
 		fmt.Printf("sspai rss Error:%v\n", err.Error())
 		return
 	}
-	sspaiCron.StartAsync()
+	sspaiScheduler.StartAsync()
 
-	appinnCron := gocron.NewScheduler(timezone)
-	_, err = appinnCron.Every(1).Days().At("10:30;16:00").Do(appinnRssServer)
+	appinnScheduler := gocron.Scheduler{}
+	err = scheduler.SetScheduler(&appinnScheduler, "0 11,16 * * *", appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return
 	}
-	appinnCron.StartAsync()
+	appinnScheduler.StartAsync()
 }
 
 func sspaiRssServer() error {
@@ -85,8 +86,10 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	}
 	if isEmail {
 		// 发送邮件
-		email := smtp.EmailMessage{}
-		err = setRssEmail(channel, &email, configs.Receiver)
+		email := smtp.SimpleEmail{
+			Receiver: configs.Receiver,
+		}
+		err = setRssEmail(channel, &email)
 		if err != nil {
 			return err
 		}
@@ -102,9 +105,9 @@ func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string,
 	var err error
 	content := ""
 	templateMap := map[string]string{}
-	err = template.GetTemplateList([]string{
+	err = template.GetTemplateList(&templateMap, []string{
 		"RssDetail", "RssBody",
-	}, template.Email, &templateMap)
+	}, template.Email)
 	if err != nil {
 		return err
 	}
@@ -122,7 +125,7 @@ func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string,
 	return nil
 }
 
-func setRssEmail(channel rss.Channel, email *smtp.EmailMessage, receiver []string) error {
+func setRssEmail(channel rss.Channel, email *smtp.SimpleEmail) error {
 	body := ""
 	err := getEmailBody(channel, &body)
 	if err != nil {
@@ -130,17 +133,15 @@ func setRssEmail(channel rss.Channel, email *smtp.EmailMessage, receiver []strin
 	}
 	email.Subject = channel.Title + "推送"
 	email.Html = body
-	email.Attachment = nil
-	email.Receiver = receiver
 	return nil
 }
 
 func getEmailBody(channel rss.Channel, body *string) error {
 	var err error
 	templateMap := map[string]string{}
-	err = template.GetTemplateList([]string{
+	err = template.GetTemplateList(&templateMap, []string{
 		"RssTitle", "RssDetail", "RssBody",
-	}, template.Email, &templateMap)
+	}, template.Email)
 	if err != nil {
 		return err
 	}

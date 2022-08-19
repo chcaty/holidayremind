@@ -28,12 +28,19 @@ func SendMdMessage(msg Message) error {
 
 	// 输出拼接好的字符串
 	messageJson := ""
-	fmt.Printf("dingtalk send message:%s", pkg.ToJson(message, &messageJson))
-	paramMap := map[string]string{
-		"access_token": msg.Token,
+	fmt.Printf("dingtalk send message:%s", pkg.ToJson(&messageJson, message))
+	var result []byte
+	requestData := net.RequestBaseData{
+		Url: "https://oapi.dingtalk.com/robot/send",
+		Params: map[string]string{
+			"access_token": msg.Token,
+		},
+		Headers: nil,
 	}
-	result := ""
-	net.Post("https://oapi.dingtalk.com/robot/send", message, paramMap, net.Json, &result)
+	err := net.PostByJson(&result, requestData, message)
+	if err != nil {
+		return err
+	}
 	fmt.Printf("DingTalk Response Result:%s", result)
 	return nil
 }

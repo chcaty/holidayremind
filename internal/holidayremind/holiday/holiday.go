@@ -10,7 +10,7 @@ import (
 
 var nowCarbon = carbon.Time2Carbon(time.Now())
 
-func GetDayProp(date string, calendar map[string]DayProperty, dateProperty *DayProperty) error {
+func GetDayProp(dateProperty *DayProperty, date string, calendar map[string]DayProperty) error {
 	if value, ok := calendar[date]; ok {
 		*dateProperty = value
 		return nil
@@ -73,7 +73,7 @@ func setHoliday(property *DayProperty, currentDay string, config holidayConfig) 
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {
 	fileName := "holiday" + strconv.Itoa(nowCarbon.Year())
-	err := pkg.GetConfigByJson(fileName, holidayConfig)
+	err := pkg.GetConfigByJson(holidayConfig, fileName)
 	if err != nil {
 		return err
 	}

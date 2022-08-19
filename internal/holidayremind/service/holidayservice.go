@@ -7,7 +7,9 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/holiday"
+	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/template"
+	"time"
 )
 
 func HolidayService() {
@@ -18,25 +20,26 @@ func HolidayService() {
 		fmt.Printf("create Calendar Error:%v\n", err.Error())
 		return
 	}
-	holidayCron := gocron.NewScheduler(timezone)
-	_, err = holidayCron.Every(1).Days().At("10:30").Do(checkTomorrow, calendar)
+	holidayScheduler := gocron.Scheduler{}
+	err = scheduler.SetScheduler(&holidayScheduler, "30 10 * * *", checkTomorrow, calendar)
 	if err != nil {
 		fmt.Printf("holidayRemind Error:%v\n", err.Error())
 		return
 	}
-	holidayCron.StartBlocking()
+	holidayScheduler.StartBlocking()
 }
 
 func checkTomorrow(calender map[string]holiday.DayProperty) error {
+	var err error
 	today := carbon.Now().ToDateString()
 	todayProp := holiday.DayProperty{}
-	err := holiday.GetDayProp(today, calender, &todayProp)
+	err = holiday.GetDayProp(&todayProp, today, calender)
 	if err != nil {
 		return err
 	}
 	tomorrow := carbon.Tomorrow().ToDateString()
 	tomorrowProp := holiday.DayProperty{}
-	err = holiday.GetDayProp(tomorrow, calender, &tomorrowProp)
+	err = holiday.GetDayProp(&tomorrowProp, tomorrow, calender)
 	if err != nil {
 		return err
 	}
@@ -44,28 +47,37 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 		return nil
 	}
 	message := dingtalk.Message{}
-	setHolidayMessage(&message, configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp)
+	err = setHolidayMessage(&message, configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp)
+	if err != nil {
+		return err
+	}
 	err = sendDingTalkMessage(message, tomorrowProp.IsHoliday)
 	if err != nil {
-		fmt.Printf("sendMessage Error:%v\n", err.Error())
 		return err
 	}
 	return nil
 }
 
-func setHolidayMessage(message *dingtalk.Message, token string, todayFlag bool, tomorrowProp holiday.DayProperty) {
+func setHolidayMessage(message *dingtalk.Message, token string, todayFlag bool, tomorrowProp holiday.DayProperty) error {
 	if !todayFlag && tomorrowProp.IsHoliday {
 		workBody := ""
-		template.GetTemplate("WorkBody", template.MarkDown, &workBody)
+		err := template.GetTemplate(&workBody, "WorkBody", template.MarkDown)
+		if err != nil {
+			return err
+		}
 		message.Title = "放假通知"
 		message.Text = fmt.Sprintf(workBody, "假期提醒姬", tomorrowProp.Description)
 	} else if todayFlag && !tomorrowProp.IsHoliday {
 		holidayBody := ""
-		template.GetTemplate("HolidayBody", template.MarkDown, &holidayBody)
+		err := template.GetTemplate(&holidayBody, "HolidayBody", template.MarkDown)
+		if err != nil {
+			return err
+		}
 		message.Title = "上班提醒"
 		message.Text = fmt.Sprintf(holidayBody, "上班摸鱼姬")
 	}
 	message.Token = token
+	return nil
 }
 
 func sendDingTalkMessage(message dingtalk.Message, tomorrowFlag bool) error {
@@ -75,12 +87,16 @@ func sendDingTalkMessage(message dingtalk.Message, tomorrowFlag bool) error {
 			return err
 		}
 	} else {
-		workRemind := gocron.NewScheduler(timezone)
-		_, err := workRemind.At("21:30").Do(dingtalk.SendMdMessage, message)
+		workRemindScheduler := gocron.Scheduler{}
+		corn := ""
+		now := time.Now()
+		sendTime := time.Date(now.Year(), now.Month(), now.Day(), 22, 30, 0, 0, time.Local)
+		scheduler.SetOnceCorn(&corn, sendTime)
+		err := scheduler.SetScheduler(&workRemindScheduler, corn, dingtalk.SendMdMessage, message)
 		if err != nil {
 			fmt.Printf("workRemind Error:%v\n", err.Error())
 		}
-		workRemind.StartAsync()
+		workRemindScheduler.StartAsync()
 	}
 	return nil
 }

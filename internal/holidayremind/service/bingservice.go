@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/scheduler"
@@ -15,13 +14,13 @@ import (
 
 func BingService() {
 	var err error
-	imageScheduler := gocron.Scheduler{}
+	imageScheduler := scheduler.GetSimpleScheduler()
 	randomData := scheduler.RandomData{
 		Lower: 90,
 		Upper: 180,
 		Unit:  scheduler.Minute,
 	}
-	err = scheduler.SetRandomScheduler(&imageScheduler, randomData, bingImageService)
+	err = imageScheduler.AddRandomJob(randomData, bingImageService)
 	if err != nil {
 		fmt.Printf("bing service Error:%v\n", err.Error())
 		return
@@ -59,7 +58,8 @@ func getBingImage(result *string) error {
 		Params:  nil,
 		Headers: net.DefaultHeader,
 	}
-	err := net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err := client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}
@@ -78,7 +78,8 @@ func getSentences(result *string) error {
 		Params:  nil,
 		Headers: net.DefaultHeader,
 	}
-	err := net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err := client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}

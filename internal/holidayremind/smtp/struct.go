@@ -14,10 +14,3 @@ type SimpleEmail struct {
 	Attachment []string
 	Receiver   []string
 }
-
-func SetSimpleEmail(email *SimpleEmail, subject string, html string, attachment []string, receiver []string) {
-	email.Html = html
-	email.Subject = subject
-	email.Attachment = attachment
-	email.Receiver = receiver
-}

@@ -26,7 +26,8 @@ func getRssInfo(rss *Rss, url string) error {
 		Headers: nil,
 		Params:  net.DefaultHeader,
 	}
-	err = net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err = client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}

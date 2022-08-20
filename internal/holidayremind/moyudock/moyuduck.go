@@ -14,7 +14,8 @@ func GetHotTop(top *Response[HotTopSite]) error {
 		Headers: nil,
 		Params:  net.DefaultHeader,
 	}
-	err = net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err = client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}
@@ -33,7 +34,8 @@ func GetHoliday(holidayInfo *Response[Holiday]) error {
 		Headers: nil,
 		Params:  net.DefaultHeader,
 	}
-	err = net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err = client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}
@@ -52,7 +54,8 @@ func GetImage(imageUrl *Response[string]) error {
 		Headers: nil,
 		Params:  net.DefaultHeader,
 	}
-	err = net.Get(&resp, requestData)
+	client := net.GetSimpleHttpClient()
+	err = client.Get(&resp, requestData)
 	if err != nil {
 		return err
 	}

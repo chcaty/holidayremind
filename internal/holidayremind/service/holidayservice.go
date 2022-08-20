@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"github.com/golang-module/carbon"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
@@ -20,8 +19,8 @@ func HolidayService() {
 		fmt.Printf("create Calendar Error:%v\n", err.Error())
 		return
 	}
-	holidayScheduler := gocron.Scheduler{}
-	err = scheduler.SetScheduler(&holidayScheduler, "30 10 * * *", checkTomorrow, calendar)
+	holidayScheduler := scheduler.GetSimpleScheduler()
+	err = holidayScheduler.AddCornJob("30 10 * * *", checkTomorrow, calendar)
 	if err != nil {
 		fmt.Printf("holidayRemind Error:%v\n", err.Error())
 		return
@@ -87,12 +86,12 @@ func sendDingTalkMessage(message dingtalk.Message, tomorrowFlag bool) error {
 			return err
 		}
 	} else {
-		workRemindScheduler := gocron.Scheduler{}
+		workRemindScheduler := scheduler.GetSimpleScheduler()
 		corn := ""
 		now := time.Now()
 		sendTime := time.Date(now.Year(), now.Month(), now.Day(), 22, 30, 0, 0, time.Local)
 		scheduler.SetOnceCorn(&corn, sendTime)
-		err := scheduler.SetScheduler(&workRemindScheduler, corn, dingtalk.SendMdMessage, message)
+		err := workRemindScheduler.AddCornJob(corn, dingtalk.SendMdMessage, message)
 		if err != nil {
 			fmt.Printf("workRemind Error:%v\n", err.Error())
 		}

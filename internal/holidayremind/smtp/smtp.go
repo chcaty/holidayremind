@@ -10,7 +10,7 @@ import (
 
 func SendEmail(message SimpleEmail, config Config) error {
 	var err error
-	e := &email.Email{
+	mail := &email.Email{
 		From:    config.UserName,
 		To:      message.Receiver,
 		Subject: message.Subject,
@@ -20,7 +20,7 @@ func SendEmail(message SimpleEmail, config Config) error {
 	if len(message.Attachment) > 0 {
 		for i := 0; i < len(message.Attachment); i++ {
 			if len(message.Attachment[i]) > 0 {
-				_, err = e.AttachFile(message.Attachment[i])
+				_, err = mail.AttachFile(message.Attachment[i])
 				if err != nil {
 					return fmt.Errorf("email attach file fail. error: %w", err)
 				}
@@ -29,7 +29,7 @@ func SendEmail(message SimpleEmail, config Config) error {
 		}
 	}
 
-	err = e.SendWithTLS(config.Host+":"+config.Port, smtp.PlainAuth("", config.UserName, config.Password, config.Host), &tls.Config{ServerName: config.Host})
+	err = mail.SendWithTLS(config.Host+":"+config.Port, smtp.PlainAuth("", config.UserName, config.Password, config.Host), &tls.Config{ServerName: config.Host})
 	if err != nil {
 		return fmt.Errorf("send email fail. error: %w", err)
 	}

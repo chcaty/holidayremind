@@ -1,14 +1,21 @@
 package dingtalk
 
+// AtParams 提醒参数
 type AtParams struct {
+	// 需要提醒的手机号数组
 	AtMobiles []string `json:"atMobiles,omitempty"`
-	IsAtAll   bool     `json:"isAtAll"`
+	// 是否提醒全部人
+	IsAtAll bool `json:"isAtAll"`
 }
 
+// MarkdownMessage MarkDown消息
 type MarkdownMessage struct {
-	MsgType  string         `json:"msgtype"`
+	// 消息类型
+	MsgType string `json:"msgtype"`
+	// Markdown消息参数
 	Markdown MarkdownParams `json:"markdown"`
-	At       AtParams       `json:"at"`
+	// 提醒参数
+	At AtParams `json:"at"`
 }
 
 type MarkdownParams struct {

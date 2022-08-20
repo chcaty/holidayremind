@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
@@ -13,16 +12,16 @@ import (
 
 func RssService() {
 	var err error
-	sspaiScheduler := gocron.Scheduler{}
-	err = scheduler.SetScheduler(&sspaiScheduler, "30 10,15 * * *", sspaiRssServer)
+	sspaiScheduler := scheduler.GetSimpleScheduler()
+	err = sspaiScheduler.AddCornJob("30 10,15 * * *", sspaiRssServer)
 	if err != nil {
 		fmt.Printf("sspai rss Error:%v\n", err.Error())
 		return
 	}
 	sspaiScheduler.StartAsync()
 
-	appinnScheduler := gocron.Scheduler{}
-	err = scheduler.SetScheduler(&appinnScheduler, "0 11,16 * * *", appinnRssServer)
+	appinnScheduler := scheduler.GetSimpleScheduler()
+	err = appinnScheduler.AddCornJob("0 11,16 * * *", appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return

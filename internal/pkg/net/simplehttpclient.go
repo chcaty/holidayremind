@@ -8,10 +8,33 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"sync"
+	"time"
 )
 
+var instance *http.Client
+var once sync.Once
+
+type SimpleHttpClient struct {
+}
+
+type SimpleHttpClientRequest interface {
+	Get(response *[]byte, data RequestBaseData) error
+	Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error
+	PostByJson(response *[]byte, data RequestBaseData, body any) error
+}
+
+func (s *SimpleHttpClient) GetHttpClient() *http.Client {
+	once.Do(func() {
+		instance = &http.Client{
+			Timeout: 5 * time.Second,
+		}
+	})
+	return instance
+}
+
 // Get http get method
-func Get(response *[]byte, data RequestBaseData) error {
+func (s *SimpleHttpClient) Get(response *[]byte, data RequestBaseData) error {
 	//new request
 	req, err := http.NewRequest("GET", data.Url, nil)
 	if err != nil {
@@ -32,7 +55,7 @@ func Get(response *[]byte, data RequestBaseData) error {
 		}
 	}
 	//http client
-	client := &http.Client{}
+	client := s.GetHttpClient()
 	log.Printf("Go GET URL : %s \n", req.URL.String())
 
 	//傳送請求
@@ -52,10 +75,9 @@ func Get(response *[]byte, data RequestBaseData) error {
 }
 
 // Post http post method
-func Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error {
+func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error {
 	//add post body
 	var bodyJson []byte
-	var req *http.Request
 	if body != nil {
 		var err error
 		bodyJson, err = json.Marshal(body)
@@ -84,7 +106,7 @@ func Post(response *[]byte, data RequestBaseData, contentType ContentType, body 
 	//set Content-type
 	req.Header.Set("Content-type", string(contentType))
 	//http client
-	client := &http.Client{}
+	client := s.GetHttpClient()
 	log.Printf("Go POST URL : %s \n", req.URL.String())
 
 	//傳送請求
@@ -104,8 +126,8 @@ func Post(response *[]byte, data RequestBaseData, contentType ContentType, body 
 }
 
 // PostByJson http post method with header content-type:application/json
-func PostByJson(response *[]byte, data RequestBaseData, body any) error {
-	err := Post(response, data, Json, body)
+func (s *SimpleHttpClient) PostByJson(response *[]byte, data RequestBaseData, body any) error {
+	err := s.Post(response, data, Json, body)
 	if err != nil {
 		return err
 	}
@@ -120,4 +142,9 @@ func closeBody(body *io.ReadCloser) {
 			fmt.Printf("Request Body Close error: %s", err.Error())
 		}
 	}(*body)
+}
+
+// GetSimpleHttpClient 生成一个SimpleHttpClient对象
+func GetSimpleHttpClient() *SimpleHttpClient {
+	return new(SimpleHttpClient)
 }

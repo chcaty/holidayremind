@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/moyudock"
 	"holidayRemind/internal/holidayremind/scheduler"
@@ -11,8 +10,8 @@ import (
 )
 
 func HotTopService() {
-	hotTopScheduler := gocron.Scheduler{}
-	err := scheduler.SetScheduler(&hotTopScheduler, "30 10,15 * * *", weiboHotTopService)
+	hotTopScheduler := scheduler.GetSimpleScheduler()
+	err := hotTopScheduler.AddCornJob("30 10,15 * * *", weiboHotTopService)
 	if err != nil {
 		fmt.Printf("hotTop Error:%v\n", err.Error())
 		return

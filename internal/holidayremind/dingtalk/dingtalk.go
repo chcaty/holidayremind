@@ -10,7 +10,7 @@ import (
 func SendMdMessage(msg Message) error {
 	var title = msg.Title
 	var At AtParams
-	if msg.IsRemind {
+	if msg.IsRemind || msg.IsRemindAll {
 		title = title + "@" + msg.Tel
 		At = AtParams{
 			IsAtAll:   msg.IsRemindAll,
@@ -42,6 +42,6 @@ func SendMdMessage(msg Message) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("DingTalk Response Result:%s", result)
+	fmt.Printf("DingTalk Response Result:%s\n", result)
 	return nil
 }

@@ -6,3 +6,5 @@ const (
 	MarkDown Type = iota
 	Email
 )
+
+var templateFileName = "messagetemplate"

@@ -6,51 +6,37 @@ import (
 	"holidayRemind/internal/pkg/net"
 )
 
-func GetHotTop(top *Response[HotTopSite]) error {
-	var err error
-	var resp []byte
-	requestData := net.RequestBaseData{
-		Url:     baseUrl + "hot/all",
-		Headers: nil,
-		Params:  net.DefaultHeader,
-	}
-	client := net.GetSimpleHttpClient()
-	err = client.Get(&resp, requestData)
+const baseUrl = "https://api.moyuduck.com/"
+
+func GetHotTop(topSiteInfo *Response[HotTopSite]) error {
+	err := getRequest(topSiteInfo, "hot/all")
 	if err != nil {
 		return err
-	}
-	err = json.Unmarshal(resp, top)
-	if err != nil {
-		return fmt.Errorf("get hottop struct fail. error: %w", err)
 	}
 	return nil
 }
 
 func GetHoliday(holidayInfo *Response[Holiday]) error {
-	var err error
-	var resp []byte
-	requestData := net.RequestBaseData{
-		Url:     baseUrl + "holiday",
-		Headers: nil,
-		Params:  net.DefaultHeader,
-	}
-	client := net.GetSimpleHttpClient()
-	err = client.Get(&resp, requestData)
+	err := getRequest(holidayInfo, "holiday")
 	if err != nil {
 		return err
-	}
-	err = json.Unmarshal(resp, holidayInfo)
-	if err != nil {
-		return fmt.Errorf("get holiday struct fail. error: %w", err)
 	}
 	return nil
 }
 
-func GetImage(imageUrl *Response[string]) error {
+func GetImage(imageInfo *Response[string]) error {
+	err := getRequest(imageInfo, "random/xiezhen")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getRequest[T ResponseData](data *T, path string) error {
 	var err error
 	var resp []byte
 	requestData := net.RequestBaseData{
-		Url:     baseUrl + "random/xiezhen",
+		Url:     baseUrl + path,
 		Headers: nil,
 		Params:  net.DefaultHeader,
 	}
@@ -59,9 +45,9 @@ func GetImage(imageUrl *Response[string]) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(resp, imageUrl)
+	err = json.Unmarshal(resp, data)
 	if err != nil {
-		return fmt.Errorf("get image struct fail. error: %w", err)
+		return fmt.Errorf("get struct fail. error: %w", err)
 	}
 	return nil
 }

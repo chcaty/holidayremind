@@ -47,3 +47,7 @@ type HotTopDetail struct {
 	Url      string
 	HotValue string
 }
+
+type ResponseData interface {
+	Response[string] | Response[Holiday] | Response[HotTopSite]
+}

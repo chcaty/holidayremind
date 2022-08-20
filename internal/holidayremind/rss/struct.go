@@ -2,6 +2,7 @@ package rss
 
 import "encoding/xml"
 
+// Rss RssXml信息
 type Rss struct {
 	XMLName xml.Name `xml:"rss"`
 	Channel Channel  `xml:"channel"`

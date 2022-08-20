@@ -8,6 +8,7 @@ import (
 	"holidayRemind/internal/holidayremind/holiday"
 	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg"
 	"time"
 )
 
@@ -32,13 +33,13 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	var err error
 	today := carbon.Now().ToDateString()
 	todayProp := holiday.DayProperty{}
-	err = holiday.GetDayProp(&todayProp, today, calender)
+	err = pkg.GetMapValue(&todayProp, today, calender)
 	if err != nil {
 		return err
 	}
 	tomorrow := carbon.Tomorrow().ToDateString()
 	tomorrowProp := holiday.DayProperty{}
-	err = holiday.GetDayProp(&tomorrowProp, tomorrow, calender)
+	err = pkg.GetMapValue(&tomorrowProp, tomorrow, calender)
 	if err != nil {
 		return err
 	}

@@ -1,11 +1,13 @@
 package holiday
 
+// 假期配置
 type holidayConfig struct {
-	Holidays           map[string]string
-	SpecialWorkingDays map[string]string
+	Holidays           map[string]string //假期
+	SpecialWorkingDays map[string]string //补班日
 }
 
+// DayProperty 日期属性
 type DayProperty struct {
-	IsHoliday   bool
-	Description string
+	IsHoliday   bool   // 是否假期
+	Description string // 日期描述
 }

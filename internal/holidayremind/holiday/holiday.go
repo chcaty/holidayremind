@@ -1,7 +1,6 @@
 package holiday
 
 import (
-	"errors"
 	"github.com/golang-module/carbon"
 	"holidayRemind/internal/pkg"
 	"strconv"
@@ -9,14 +8,6 @@ import (
 )
 
 var nowCarbon = carbon.Time2Carbon(time.Now())
-
-func GetDayProp(dateProperty *DayProperty, date string, calendar map[string]DayProperty) error {
-	if value, ok := calendar[date]; ok {
-		*dateProperty = value
-		return nil
-	}
-	return errors.New("calendar not contain date")
-}
 
 func CreateCalendar(calendar *map[string]DayProperty) error {
 	// 根据法定节假日设置日历

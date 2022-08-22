@@ -11,11 +11,11 @@ func GetConfigByJson(value any, fileName string) error {
 	viper.AddConfigPath("../../configs/json")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
-		return fmt.Errorf("viper get config Error %w", err)
+		return fmt.Errorf("viper get config error %w\n", err)
 	}
 	err = viper.Unmarshal(value)
 	if err != nil {
-		return fmt.Errorf("viper unmarshal config Error %w", err)
+		return fmt.Errorf("viper unmarshal config error %w\n", err)
 	}
 	return nil
 }

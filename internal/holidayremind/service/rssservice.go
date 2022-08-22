@@ -106,7 +106,7 @@ func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string,
 	templateMap := map[string]string{}
 	err = template.GetTemplateList(&templateMap, []string{
 		"RssDetail", "RssBody",
-	}, template.Email)
+	}, template.MarkDown)
 	if err != nil {
 		return err
 	}

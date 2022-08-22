@@ -10,9 +10,10 @@ import (
 var nowCarbon = carbon.Time2Carbon(time.Now())
 
 func CreateCalendar(calendar *map[string]DayProperty) error {
+	var err error
 	// 根据法定节假日设置日历
 	config := holidayConfig{}
-	err := getHolidayConfig(&config)
+	err = getHolidayConfig(&config)
 	if err != nil {
 		return err
 	}
@@ -24,7 +25,7 @@ func CreateCalendar(calendar *map[string]DayProperty) error {
 	for currentDate.DiffInDays(yearEndDate) > 0 {
 		currentDateStr := currentDate.ToDateString()
 		property := DayProperty{}
-		err := setHoliday(&property, currentDateStr, config)
+		err = setHoliday(&property, currentDateStr, config)
 		if err != nil {
 			return err
 		}

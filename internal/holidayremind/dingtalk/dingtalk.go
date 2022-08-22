@@ -1,13 +1,14 @@
 package dingtalk
 
 import (
-	"fmt"
 	"holidayRemind/internal/pkg"
 	"holidayRemind/internal/pkg/net"
+	"log"
 )
 
 // SendMdMessage 发送钉钉机器人Markdown消息
 func SendMdMessage(msg Message) error {
+	var err error
 	var title = msg.Title
 	var At AtParams
 	if msg.IsRemind || msg.IsRemindAll {
@@ -28,7 +29,11 @@ func SendMdMessage(msg Message) error {
 
 	// 输出拼接好的字符串
 	messageJson := ""
-	fmt.Printf("dingtalk send message:%s\n", pkg.ToJson(&messageJson, message))
+	err = pkg.ToJson(&messageJson, message)
+	if err != nil {
+		return err
+	}
+	log.Printf("DingTalk Send Message Json:%s", messageJson)
 	var result []byte
 	requestData := net.RequestBaseData{
 		Url: "https://oapi.dingtalk.com/robot/send",
@@ -38,10 +43,10 @@ func SendMdMessage(msg Message) error {
 		Headers: nil,
 	}
 	client := net.GetSimpleHttpClient()
-	err := client.PostByJson(&result, requestData, message)
+	err = client.PostByJson(&result, requestData, message)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("DingTalk Response Result:%s\n", result)
+	log.Printf("DingTalk Response Result:%s", string(result))
 	return nil
 }

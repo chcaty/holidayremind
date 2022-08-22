@@ -1,8 +1,8 @@
 package moyudock
 
 import (
-	"encoding/json"
 	"fmt"
+	"holidayRemind/internal/pkg"
 	"holidayRemind/internal/pkg/net"
 )
 
@@ -45,7 +45,7 @@ func getRequest[T ResponseData](data *T, path string) error {
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(resp, data)
+	err = pkg.ToObjectByBytes(data, resp)
 	if err != nil {
 		return fmt.Errorf("get struct fail. error: %w", err)
 	}

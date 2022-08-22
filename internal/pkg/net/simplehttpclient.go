@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -41,22 +40,12 @@ func (s *SimpleHttpClient) Get(response *[]byte, data RequestBaseData) error {
 		return errors.New("new request is fail ")
 	}
 	//add params
-	q := req.URL.Query()
-	if data.Params != nil {
-		for key, val := range data.Params {
-			q.Add(key, val)
-		}
-		req.URL.RawQuery = q.Encode()
-	}
+	setParams(req, data)
 	//add headers
-	if data.Headers != nil {
-		for key, val := range data.Headers {
-			req.Header.Add(key, val)
-		}
-	}
+	setHeaders(req, data)
 	//http client
 	client := s.GetHttpClient()
-	log.Printf("Go GET URL : %s \n", req.URL.String())
+	log.Printf("Go GET URL : %s", req.URL.String())
 
 	//傳送請求
 	res, err := client.Do(req)
@@ -76,10 +65,10 @@ func (s *SimpleHttpClient) Get(response *[]byte, data RequestBaseData) error {
 
 // Post http post method
 func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error {
+	var err error
 	//add post body
 	var bodyJson []byte
 	if body != nil {
-		var err error
 		bodyJson, err = json.Marshal(body)
 		if err != nil {
 			return errors.New("http post body to json failed")
@@ -87,27 +76,17 @@ func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentT
 	}
 	req, err := http.NewRequest("POST", data.Url, bytes.NewBuffer(bodyJson))
 	if err != nil {
-		return errors.New("new request is fail: %v \n")
+		return errors.New("new request is fail ")
 	}
 	//add params
-	q := req.URL.Query()
-	if data.Params != nil {
-		for key, val := range data.Params {
-			q.Add(key, val)
-		}
-		req.URL.RawQuery = q.Encode()
-	}
+	setParams(req, data)
 	//add headers
-	if data.Headers != nil {
-		for key, val := range data.Headers {
-			req.Header.Add(key, val)
-		}
-	}
+	setHeaders(req, data)
 	//set Content-type
 	req.Header.Set("Content-type", string(contentType))
 	//http client
 	client := s.GetHttpClient()
-	log.Printf("Go POST URL : %s \n", req.URL.String())
+	log.Printf("Go POST URL : %s", req.URL.String())
 
 	//傳送請求
 	res, err := client.Do(req)
@@ -139,7 +118,7 @@ func closeBody(body *io.ReadCloser) {
 	func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-			fmt.Printf("Request Body Close error: %s", err.Error())
+			log.Printf("Request Body Close Fail. Error: %s", err.Error())
 		}
 	}(*body)
 }
@@ -147,4 +126,22 @@ func closeBody(body *io.ReadCloser) {
 // GetSimpleHttpClient 生成一个SimpleHttpClient对象
 func GetSimpleHttpClient() *SimpleHttpClient {
 	return new(SimpleHttpClient)
+}
+
+func setParams(req *http.Request, data RequestBaseData) {
+	q := req.URL.Query()
+	if data.Params != nil {
+		for key, val := range data.Params {
+			q.Add(key, val)
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+}
+
+func setHeaders(req *http.Request, data RequestBaseData) {
+	if data.Headers != nil {
+		for key, val := range data.Headers {
+			req.Header.Add(key, val)
+		}
+	}
 }

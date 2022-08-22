@@ -8,5 +8,5 @@ func GetMapValue[T any, K comparable](value *T, key K, config map[K]T) error {
 		*value = result
 		return nil
 	}
-	return errors.New("map not contain key")
+	return errors.New("map not contain this key")
 }

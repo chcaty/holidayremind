@@ -33,20 +33,20 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	var err error
 	today := carbon.Now().ToDateString()
 	todayProp := holiday.DayProperty{}
-	err = pkg.GetMapValue(&todayProp, today, calender)
+	err = pkg.GetMapValue(calender, today, &todayProp)
 	if err != nil {
 		return err
 	}
 	tomorrow := carbon.Tomorrow().ToDateString()
 	tomorrowProp := holiday.DayProperty{}
-	err = pkg.GetMapValue(&tomorrowProp, tomorrow, calender)
+	err = pkg.GetMapValue(calender, tomorrow, &tomorrowProp)
 	if err != nil {
 		return err
 	}
 	if tomorrowProp.IsHoliday == tomorrowProp.IsHoliday {
 		return nil
 	}
-	message := dingtalk.Message{}
+	message := dingtalk.MessageDTO{}
 	err = setHolidayMessage(&message, configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	return nil
 }
 
-func setHolidayMessage(message *dingtalk.Message, token string, todayFlag bool, tomorrowProp holiday.DayProperty) error {
+func setHolidayMessage(message *dingtalk.MessageDTO, token string, todayFlag bool, tomorrowProp holiday.DayProperty) error {
 	if !todayFlag && tomorrowProp.IsHoliday {
 		workBody := ""
 		err := template.GetTemplate(&workBody, "WorkBody", template.MarkDown)
@@ -80,7 +80,7 @@ func setHolidayMessage(message *dingtalk.Message, token string, todayFlag bool, 
 	return nil
 }
 
-func sendDingTalkMessage(message dingtalk.Message, tomorrowFlag bool) error {
+func sendDingTalkMessage(message dingtalk.MessageDTO, tomorrowFlag bool) error {
 	if tomorrowFlag {
 		err := dingtalk.SendMdMessage(message)
 		if err != nil {

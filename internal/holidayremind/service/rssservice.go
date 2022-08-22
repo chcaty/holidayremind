@@ -73,7 +73,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	var err error
 	if isDingTalk {
 		// 推送到钉钉机器人
-		message := dingtalk.Message{}
+		message := dingtalk.MessageDTO{}
 		err = setRssMessage(channel, &message, configs.DingTalkToken, "")
 		if err != nil {
 			return err
@@ -100,7 +100,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	return nil
 }
 
-func setRssMessage(channel rss.Channel, message *dingtalk.Message, token string, tel string) error {
+func setRssMessage(channel rss.Channel, message *dingtalk.MessageDTO, token string, tel string) error {
 	var err error
 	content := ""
 	templateMap := map[string]string{}

@@ -9,7 +9,7 @@ import (
 const baseUrl = "https://api.moyuduck.com/"
 
 func GetHotTop(topSiteInfo *Response[HotTopSite]) error {
-	err := getRequest(topSiteInfo, "hot/all")
+	err := getRequest("hot/all", topSiteInfo)
 	if err != nil {
 		return err
 	}
@@ -17,7 +17,7 @@ func GetHotTop(topSiteInfo *Response[HotTopSite]) error {
 }
 
 func GetHoliday(holidayInfo *Response[Holiday]) error {
-	err := getRequest(holidayInfo, "holiday")
+	err := getRequest("holiday", holidayInfo)
 	if err != nil {
 		return err
 	}
@@ -25,14 +25,14 @@ func GetHoliday(holidayInfo *Response[Holiday]) error {
 }
 
 func GetImage(imageInfo *Response[string]) error {
-	err := getRequest(imageInfo, "random/xiezhen")
+	err := getRequest("random/xiezhen", imageInfo)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func getRequest[T ResponseData](data *T, path string) error {
+func getRequest[T ResponseData](path string, data *T) error {
 	var err error
 	var resp []byte
 	requestData := net.RequestBaseData{
@@ -41,11 +41,11 @@ func getRequest[T ResponseData](data *T, path string) error {
 		Params:  net.DefaultHeader,
 	}
 	client := net.GetSimpleHttpClient()
-	err = client.Get(&resp, requestData)
+	err = client.Get(requestData, &resp)
 	if err != nil {
 		return err
 	}
-	err = pkg.ToObjectByBytes(data, resp)
+	err = pkg.ToObjectByBytes(resp, data)
 	if err != nil {
 		return fmt.Errorf("get struct fail. error: %w", err)
 	}

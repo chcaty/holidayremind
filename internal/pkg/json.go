@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func ToJson(value *string, object any) error {
+func ToJson(object any, value *string) error {
 	data, err := json.Marshal(object)
 	*value = string(data)
 	if err != nil {
@@ -14,7 +14,7 @@ func ToJson(value *string, object any) error {
 	return nil
 }
 
-func ToBytes(value *[]byte, object any) error {
+func ToBytes(object any, value *[]byte) error {
 	data, err := json.Marshal(object)
 	*value = data
 	if err != nil {
@@ -23,7 +23,7 @@ func ToBytes(value *[]byte, object any) error {
 	return nil
 }
 
-func ToObjectByString(object any, value string) error {
+func ToObjectByString(value string, object any) error {
 	data := []byte(value)
 	err := json.Unmarshal(data, object)
 	if err != nil {
@@ -32,7 +32,7 @@ func ToObjectByString(object any, value string) error {
 	return nil
 }
 
-func ToObjectByBytes(object any, value []byte) error {
+func ToObjectByBytes(value []byte, object any) error {
 	err := json.Unmarshal(value, object)
 	if err != nil {
 		return fmt.Errorf("josn unmarshal with error: %w\n", err)

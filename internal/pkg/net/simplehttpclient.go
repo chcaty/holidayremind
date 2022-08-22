@@ -18,9 +18,9 @@ type SimpleHttpClient struct {
 }
 
 type SimpleHttpClientRequest interface {
-	Get(response *[]byte, data RequestBaseData) error
-	Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error
-	PostByJson(response *[]byte, data RequestBaseData, body any) error
+	Get(data RequestBaseData, response *[]byte) error
+	Post(data RequestBaseData, contentType ContentType, body any, response *[]byte) error
+	PostByJson(data RequestBaseData, body any, response *[]byte) error
 }
 
 func (s *SimpleHttpClient) GetHttpClient() *http.Client {
@@ -33,16 +33,16 @@ func (s *SimpleHttpClient) GetHttpClient() *http.Client {
 }
 
 // Get http get method
-func (s *SimpleHttpClient) Get(response *[]byte, data RequestBaseData) error {
+func (s *SimpleHttpClient) Get(data RequestBaseData, response *[]byte) error {
 	//new request
 	req, err := http.NewRequest("GET", data.Url, nil)
 	if err != nil {
 		return errors.New("new request is fail ")
 	}
 	//add params
-	setParams(req, data)
+	setParams(data, req)
 	//add headers
-	setHeaders(req, data)
+	setHeaders(data, req)
 	//http client
 	client := s.GetHttpClient()
 	log.Printf("Go GET URL : %s", req.URL.String())
@@ -64,7 +64,7 @@ func (s *SimpleHttpClient) Get(response *[]byte, data RequestBaseData) error {
 }
 
 // Post http post method
-func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentType ContentType, body any) error {
+func (s *SimpleHttpClient) Post(data RequestBaseData, contentType ContentType, body any, response *[]byte) error {
 	var err error
 	//add post body
 	var bodyJson []byte
@@ -79,9 +79,9 @@ func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentT
 		return errors.New("new request is fail ")
 	}
 	//add params
-	setParams(req, data)
+	setParams(data, req)
 	//add headers
-	setHeaders(req, data)
+	setHeaders(data, req)
 	//set Content-type
 	req.Header.Set("Content-type", string(contentType))
 	//http client
@@ -105,8 +105,8 @@ func (s *SimpleHttpClient) Post(response *[]byte, data RequestBaseData, contentT
 }
 
 // PostByJson http post method with header content-type:application/json
-func (s *SimpleHttpClient) PostByJson(response *[]byte, data RequestBaseData, body any) error {
-	err := s.Post(response, data, Json, body)
+func (s *SimpleHttpClient) PostByJson(data RequestBaseData, body any, response *[]byte) error {
+	err := s.Post(data, Json, body, response)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func GetSimpleHttpClient() *SimpleHttpClient {
 	return new(SimpleHttpClient)
 }
 
-func setParams(req *http.Request, data RequestBaseData) {
+func setParams(data RequestBaseData, req *http.Request) {
 	q := req.URL.Query()
 	if data.Params != nil {
 		for key, val := range data.Params {
@@ -138,7 +138,7 @@ func setParams(req *http.Request, data RequestBaseData) {
 	}
 }
 
-func setHeaders(req *http.Request, data RequestBaseData) {
+func setHeaders(data RequestBaseData, req *http.Request) {
 	if data.Headers != nil {
 		for key, val := range data.Headers {
 			req.Header.Add(key, val)

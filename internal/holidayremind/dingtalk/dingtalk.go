@@ -7,29 +7,29 @@ import (
 )
 
 // SendMdMessage 发送钉钉机器人Markdown消息
-func SendMdMessage(msg Message) error {
+func SendMdMessage(dto MessageDTO) error {
 	var err error
-	var title = msg.Title
+	var title = dto.Title
 	var At AtParams
-	if msg.IsRemind || msg.IsRemindAll {
-		title = title + "@" + msg.Tel
+	if dto.IsRemind || dto.IsRemindAll {
+		title = title + "@" + dto.Tel
 		At = AtParams{
-			IsAtAll:   msg.IsRemindAll,
-			AtMobiles: []string{msg.Tel},
+			IsAtAll:   dto.IsRemindAll,
+			AtMobiles: []string{dto.Tel},
 		}
 	}
-	message := MarkdownMessage{ // 构建 post 消息体
-		MsgType: MsgTypeMarkdown,
+	body := MarkdownMessage{ // 构建 post 消息体
+		MsgType: Markdown,
 		Markdown: MarkdownParams{
 			Title: title,
-			Text:  msg.Text,
+			Text:  dto.Text,
 		},
 		At: At,
 	}
 
 	// 输出拼接好的字符串
 	messageJson := ""
-	err = pkg.ToJson(&messageJson, message)
+	err = pkg.ToJson(body, &messageJson)
 	if err != nil {
 		return err
 	}
@@ -38,12 +38,12 @@ func SendMdMessage(msg Message) error {
 	requestData := net.RequestBaseData{
 		Url: "https://oapi.dingtalk.com/robot/send",
 		Params: map[string]string{
-			"access_token": msg.Token,
+			"access_token": dto.Token,
 		},
 		Headers: nil,
 	}
 	client := net.GetSimpleHttpClient()
-	err = client.PostByJson(&result, requestData, message)
+	err = client.PostByJson(requestData, body, &result)
 	if err != nil {
 		return err
 	}

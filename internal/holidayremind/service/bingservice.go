@@ -59,7 +59,7 @@ func getBingImage(result *string) error {
 		Headers: net.DefaultHeader,
 	}
 	client := net.GetSimpleHttpClient()
-	err := client.Get(&resp, requestData)
+	err := client.Get(requestData, &resp)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func getSentences(result *string) error {
 		Headers: net.DefaultHeader,
 	}
 	client := net.GetSimpleHttpClient()
-	err := client.Get(&resp, requestData)
+	err := client.Get(requestData, &resp)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func sendDingTalk(imageUrl string, content string) error {
 	if err != nil {
 		return err
 	}
-	message := dingtalk.Message{
+	message := dingtalk.MessageDTO{
 		Title:       "今日推送",
 		Text:        fmt.Sprintf(imageBody, "发图姬", content, imageUrl),
 		Token:       configs.DingTalkToken,

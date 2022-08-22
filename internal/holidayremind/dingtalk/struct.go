@@ -8,7 +8,7 @@ type AtParams struct {
 
 // MarkdownMessage MarkDown消息
 type MarkdownMessage struct {
-	MsgType  string         `json:"msgtype"`  // 消息类型
+	MsgType  MessageType    `json:"msgtype"`  // 消息类型
 	Markdown MarkdownParams `json:"markdown"` // Markdown消息参数
 	At       AtParams       `json:"at"`       // 提醒参数
 }
@@ -19,8 +19,8 @@ type MarkdownParams struct {
 	Text  string `json:"text"`  //内容
 }
 
-// Message 消息
-type Message struct {
+// MessageDTO 消息
+type MessageDTO struct {
 	Title       string // 标题
 	Text        string // 内容
 	Token       string // 机器人Token

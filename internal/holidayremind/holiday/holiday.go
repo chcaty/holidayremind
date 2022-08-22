@@ -25,7 +25,7 @@ func CreateCalendar(calendar *map[string]DayProperty) error {
 	for currentDate.DiffInDays(yearEndDate) > 0 {
 		currentDateStr := currentDate.ToDateString()
 		property := DayProperty{}
-		err = setHoliday(&property, currentDateStr, config)
+		err = setHoliday(currentDateStr, config, &property)
 		if err != nil {
 			return err
 		}
@@ -35,7 +35,7 @@ func CreateCalendar(calendar *map[string]DayProperty) error {
 	return nil
 }
 
-func setHoliday(property *DayProperty, currentDay string, config holidayConfig) error {
+func setHoliday(currentDay string, config holidayConfig, property *DayProperty) error {
 	current := carbon.Parse(currentDay)
 	// 根据周几初始化日历
 	property.IsHoliday = false
@@ -65,7 +65,7 @@ func setHoliday(property *DayProperty, currentDay string, config holidayConfig) 
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {
 	fileName := "holiday" + strconv.Itoa(nowCarbon.Year())
-	err := pkg.GetConfigByJson(holidayConfig, fileName)
+	err := pkg.GetConfigByJson(fileName, pkg.Json, pkg.Path, holidayConfig)
 	if err != nil {
 		return err
 	}

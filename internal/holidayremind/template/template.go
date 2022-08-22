@@ -7,11 +7,11 @@ import (
 func GetTemplate(template *string, name string, templateType Type) error {
 	var err error
 	config := Config{}
-	err = pkg.GetConfigByJson(&config, templateFileName)
+	err = pkg.GetConfigByJson(templateFileName, pkg.Json, pkg.Path, &config)
 	if err != nil {
 		return err
 	}
-	err = getTemplateByType(template, name, templateType, config)
+	err = getTemplateByType(name, templateType, config, template)
 	if err != nil {
 		return err
 	}
@@ -21,13 +21,13 @@ func GetTemplate(template *string, name string, templateType Type) error {
 func GetTemplateList(templates *map[string]string, names []string, templateType Type) error {
 	var err error
 	config := Config{}
-	err = pkg.GetConfigByJson(&config, templateFileName)
+	err = pkg.GetConfigByJson(templateFileName, pkg.Json, pkg.Path, &config)
 	if err != nil {
 		return err
 	}
 	template := ""
 	for _, name := range names {
-		err = getTemplateByType(&template, name, templateType, config)
+		err = getTemplateByType(name, templateType, config, &template)
 		if err != nil {
 			return err
 		}
@@ -36,17 +36,16 @@ func GetTemplateList(templates *map[string]string, names []string, templateType 
 	return nil
 }
 
-func getTemplateByType(template *string, name string, templateType Type, config Config) error {
-	if templateType == MarkDown {
-		err := pkg.GetMapValue(template, name, config.MarkDownTemplate)
-		if err != nil {
-			return err
-		}
-	} else {
-		err := pkg.GetMapValue(template, name, config.EmailTemplate)
-		if err != nil {
-			return err
-		}
+func getTemplateByType(name string, templateType Type, config Config, template *string) error {
+	var err error
+	switch templateType {
+	case MarkDown:
+		err = pkg.GetMapValue(config.MarkDownTemplate, name, template)
+	case Email:
+		err = pkg.GetMapValue(config.EmailTemplate, name, template)
+	}
+	if err != nil {
+		return err
 	}
 	return nil
 }

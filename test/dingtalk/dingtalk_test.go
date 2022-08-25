@@ -7,7 +7,7 @@ import (
 )
 
 func TestSendMdMessage(t *testing.T) {
-	message := dingtalk.Message{
+	message := dingtalk.MarkdownMessageDTO{
 		Title:       "test",
 		Text:        "test",
 		Token:       configs.DingTalkToken,
@@ -16,6 +16,19 @@ func TestSendMdMessage(t *testing.T) {
 		IsRemindAll: false,
 	}
 	err := dingtalk.SendMdMessage(message)
+	if err != nil {
+		t.Log(err)
+		return
+	}
+	t.Log("success")
+}
+
+func TestSendFeedCardMessage(t *testing.T) {
+	message := dingtalk.FeedCardMessageDTO{
+		Links: nil,
+		Token: configs.DingTalkToken,
+	}
+	err := dingtalk.SendFeedCardMessage(message)
 	if err != nil {
 		t.Log(err)
 		return

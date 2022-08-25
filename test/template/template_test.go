@@ -7,7 +7,7 @@ import (
 
 func TestGetTemplate(t *testing.T) {
 	templateValue := ""
-	err := template.GetTemplate("RssBody", template.MarkDown, &templateValue)
+	err := template.GetTemplate(&templateValue, "RssBody", template.MarkDown)
 	if err != nil {
 		t.Log(err)
 		return

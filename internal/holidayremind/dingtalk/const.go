@@ -1,10 +1,11 @@
 package dingtalk
 
-type MessageType string
+type messageType string
 
 const (
-	Text       MessageType = "text"
-	Link       MessageType = "link"
-	Markdown   MessageType = "markdown"
-	ActionCard MessageType = "actionCard"
+	text       messageType = "text"
+	link       messageType = "link"
+	markdown   messageType = "markdown"
+	actionCard messageType = "actionCard"
+	feedCard   messageType = "feedCard"
 )

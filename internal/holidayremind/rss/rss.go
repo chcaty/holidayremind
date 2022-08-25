@@ -3,7 +3,7 @@ package rss
 import (
 	"encoding/xml"
 	"fmt"
-	"holidayRemind/internal/pkg/net"
+	"holidayRemind/internal/pkg/uxnet"
 	"regexp"
 	"sort"
 	"strings"
@@ -21,12 +21,12 @@ func Request(data RequestData, rss *Rss) error {
 func getRssInfo(rss *Rss, url string) error {
 	var err error
 	var resp []byte
-	requestData := net.RequestBaseData{
+	requestData := uxnet.BaseData{
 		Url:     url,
-		Headers: net.DefaultHeader,
+		Headers: uxnet.DefaultHeader,
 		Params:  nil,
 	}
-	client := net.GetSimpleHttpClient()
+	client := uxnet.GetHttpClient()
 	err = client.Get(requestData, &resp)
 	if err != nil {
 		return err

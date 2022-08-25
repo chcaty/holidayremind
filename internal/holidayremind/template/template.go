@@ -1,13 +1,14 @@
 package template
 
 import (
-	"holidayRemind/internal/pkg"
+	"holidayRemind/internal/pkg/uxconfig"
+	"holidayRemind/internal/pkg/uxmap"
 )
 
 func GetTemplate(template *string, name string, templateType Type) error {
 	var err error
 	config := Config{}
-	err = pkg.GetConfigByJson(templateFileName, pkg.Json, pkg.Path, &config)
+	err = uxconfig.GetValue(templateFileName, uxconfig.Json, uxconfig.Path, &config)
 	if err != nil {
 		return err
 	}
@@ -21,7 +22,7 @@ func GetTemplate(template *string, name string, templateType Type) error {
 func GetTemplateList(templates *map[string]string, names []string, templateType Type) error {
 	var err error
 	config := Config{}
-	err = pkg.GetConfigByJson(templateFileName, pkg.Json, pkg.Path, &config)
+	err = uxconfig.GetValue(templateFileName, uxconfig.Json, uxconfig.Path, &config)
 	if err != nil {
 		return err
 	}
@@ -40,9 +41,9 @@ func getTemplateByType(name string, templateType Type, config Config, template *
 	var err error
 	switch templateType {
 	case MarkDown:
-		err = pkg.GetMapValue(config.MarkDownTemplate, name, template)
+		err = uxmap.GetMapValue(config.MarkDownTemplate, name, template)
 	case Email:
-		err = pkg.GetMapValue(config.EmailTemplate, name, template)
+		err = uxmap.GetMapValue(config.EmailTemplate, name, template)
 	}
 	if err != nil {
 		return err

@@ -1,4 +1,4 @@
-package pkg
+package uxjson
 
 import (
 	"encoding/json"
@@ -6,20 +6,20 @@ import (
 )
 
 func ToJson(object any, value *string) error {
-	data, err := json.Marshal(object)
-	*value = string(data)
+	data, err := json.Marshal(&object)
 	if err != nil {
-		return fmt.Errorf("json marshal with error: %w\n", err)
+		return fmt.Errorf("uxjson marshal with error: %w\n", err)
 	}
+	*value = string(data)
 	return nil
 }
 
 func ToBytes(object any, value *[]byte) error {
 	data, err := json.Marshal(object)
-	*value = data
 	if err != nil {
-		return fmt.Errorf("json marshal with error: %w\n", err)
+		return fmt.Errorf("uxjson marshal with error: %w\n", err)
 	}
+	*value = data
 	return nil
 }
 

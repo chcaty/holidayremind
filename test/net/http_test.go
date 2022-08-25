@@ -1,14 +1,16 @@
 package net
 
 import (
-	"holidayRemind/internal/pkg/net"
+	"holidayRemind/internal/pkg/uxnet"
 	"testing"
 )
 
 func TestGetUrl(t *testing.T) {
-	t.Log(net.Get("https://api.moyuduck.com/random/xiezhen"))
+	var resp []byte
+	t.Log(uxnet.GetHttpClient().Get(uxnet.BaseData{Url: "https://api.moyuduck.com/random/xiezhen"}, &resp))
 }
 
 func TestPostUrl(t *testing.T) {
-	t.Log(net.Post("https://oapi.dingtalk.com/robot/send", nil, nil, net.Json))
+	var resp []byte
+	t.Log(uxnet.GetHttpClient().Post(uxnet.BaseData{Url: "https://oapi.dingtalk.com/robot/send"}, uxnet.Json, nil, &resp))
 }

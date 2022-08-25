@@ -37,6 +37,9 @@
     },
     {
       "HotTopDetail": "<div style=\"margin-bottom: 3px;\"><a href=\"%s\" rel=\"noopener\" target=\"_blank\" style=\"text-decoration: none; color: #333;font-weight: 400; font-size: 15px; margin:0\">%s</a><span style=\"color: #999999; font-size: 12px; font-weight: 400; \">&nbsp&nbsp%s</span></div><hr style=\"border: 0; padding-top: 1px; background: linear-gradient(to right, transparent, #d0d0d5, transparent);\" />"
+    },
+    {
+      "CalendarBody": "<body><div style=\"display: flex; flex-direction: column; justify-content: flex-start; align-items: center; align-content: flex-start; background-color: #f1f5f9; padding: 20px; height: 100%s\"><div style=\"align-content: center; width: 45%s background-color: #fff\"><h2 style=\"margin: 25px\">摸鱼人日历</h2><div style=\"margin: 25px\"><image src=\"%s\" alt=\"moyu Calendar\" width=\"100%s/></div></div></div></body>"
     }
   ]
 }

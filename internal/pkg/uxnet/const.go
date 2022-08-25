@@ -1,11 +1,11 @@
-package net
+package uxnet
 
-type ContentType string
+type contentType string
 
 const (
-	Json ContentType = "application/json"
-	Xml  ContentType = "application/xml"
-	Form ContentType = "multipart/form-data"
+	Json contentType = "application/json"
+	Xml  contentType = "application/xml"
+	Form contentType = "multipart/form-data"
 )
 
 var DefaultHeader = map[string]string{

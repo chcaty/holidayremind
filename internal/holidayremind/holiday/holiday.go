@@ -2,7 +2,7 @@ package holiday
 
 import (
 	"github.com/golang-module/carbon"
-	"holidayRemind/internal/pkg"
+	"holidayRemind/internal/pkg/uxconfig"
 	"strconv"
 	"time"
 )
@@ -37,35 +37,30 @@ func CreateCalendar(calendar *map[string]DayProperty) error {
 
 func setHoliday(currentDay string, config holidayConfig, property *DayProperty) error {
 	current := carbon.Parse(currentDay)
+	property = getDayProperty(false, "工作")
 	// 根据周几初始化日历
-	property.IsHoliday = false
-	property.Description = "工作"
 	if current.IsSaturday() {
 		flag := isBigWeek(current.Carbon2Time())
 		if flag {
-			property.IsHoliday = true
-			property.Description = "休息"
+			property = getDayProperty(true, "休息")
 		}
 	} else if current.IsSunday() {
-		property.IsHoliday = true
-		property.Description = "休息"
+		property = getDayProperty(true, "休息")
 	}
 
 	if value, ok := config.Holidays[currentDay]; ok {
-		property.Description = value
-		property.IsHoliday = true
+		property = getDayProperty(true, value)
 	}
 
 	if value, ok := config.SpecialWorkingDays[currentDay]; ok {
-		property.Description = value
-		property.IsHoliday = false
+		property = getDayProperty(false, value)
 	}
 	return nil
 }
 
 func getHolidayConfig(holidayConfig *holidayConfig) error {
 	fileName := "holiday" + strconv.Itoa(nowCarbon.Year())
-	err := pkg.GetConfigByJson(fileName, pkg.Json, pkg.Path, holidayConfig)
+	err := uxconfig.GetValue(fileName, uxconfig.Json, uxconfig.Path, holidayConfig)
 	if err != nil {
 		return err
 	}

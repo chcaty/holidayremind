@@ -1,18 +1,20 @@
-package service
+package bingservice
 
 import (
 	"fmt"
+	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
-	"holidayRemind/internal/pkg/net"
+	"holidayRemind/internal/pkg/uxnet"
+	"log"
 	"regexp"
 	"strings"
 )
 
-func BingService() {
+func Start() {
 	var err error
 	imageScheduler := scheduler.GetSimpleScheduler()
 	randomData := scheduler.RandomData{
@@ -20,15 +22,15 @@ func BingService() {
 		Upper: 180,
 		Unit:  scheduler.Minute,
 	}
-	err = imageScheduler.AddRandomJob(randomData, bingImageService)
+	err = imageScheduler.AddRandomJob(randomData, true, "BingImage", bingImageService)
 	if err != nil {
-		fmt.Printf("bing service Error:%v\n", err.Error())
+		log.Printf("bingservice service Error:%v", err.Error())
 		return
 	}
 	imageScheduler.StartAsync()
 }
 
-func bingImageService() error {
+func bingImageService(job gocron.Job) error {
 	var err error
 	imageUrl := ""
 	err = getBingImage(&imageUrl)
@@ -40,7 +42,7 @@ func bingImageService() error {
 	if err != nil {
 		return err
 	}
-	err = sendDingTalk(imageUrl, content)
+	err = sendDingTalkMessage(imageUrl, content)
 	if err != nil {
 		return err
 	}
@@ -48,17 +50,18 @@ func bingImageService() error {
 	if err != nil {
 		return err
 	}
+	log.Printf("bingImage job's last run: %s this job's next run: %s", job.LastRun(), job.NextRun())
 	return nil
 }
 
 func getBingImage(result *string) error {
 	var resp []byte
-	requestData := net.RequestBaseData{
+	requestData := uxnet.BaseData{
 		Url:     "https://tuapi.eees.cc/api.php?category=biying",
 		Params:  nil,
-		Headers: net.DefaultHeader,
+		Headers: uxnet.DefaultHeader,
 	}
-	client := net.GetSimpleHttpClient()
+	client := uxnet.GetHttpClient()
 	err := client.Get(requestData, &resp)
 	if err != nil {
 		return err
@@ -73,12 +76,12 @@ func getBingImage(result *string) error {
 
 func getSentences(result *string) error {
 	var resp []byte
-	requestData := net.RequestBaseData{
+	requestData := uxnet.BaseData{
 		Url:     "https://v1.hitokoto.cn/?encode=text",
 		Params:  nil,
-		Headers: net.DefaultHeader,
+		Headers: uxnet.DefaultHeader,
 	}
-	client := net.GetSimpleHttpClient()
+	client := uxnet.GetHttpClient()
 	err := client.Get(requestData, &resp)
 	if err != nil {
 		return err
@@ -87,14 +90,14 @@ func getSentences(result *string) error {
 	return nil
 }
 
-func sendDingTalk(imageUrl string, content string) error {
+func sendDingTalkMessage(imageUrl string, content string) error {
 	var err error
 	imageBody := ""
 	err = template.GetTemplate(&imageBody, "ImageBody", template.MarkDown)
 	if err != nil {
 		return err
 	}
-	message := dingtalk.MessageDTO{
+	message := dingtalk.MarkdownMessageDTO{
 		Title:       "今日推送",
 		Text:        fmt.Sprintf(imageBody, "发图姬", content, imageUrl),
 		Token:       configs.DingTalkToken,

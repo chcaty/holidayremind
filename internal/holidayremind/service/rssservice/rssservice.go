@@ -1,35 +1,35 @@
-package service
+package rssservice
 
 import (
 	"fmt"
+	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
 	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	"log"
 )
 
-func RssService() {
+func Start() {
 	var err error
-	sspaiScheduler := scheduler.GetSimpleScheduler()
-	err = sspaiScheduler.AddCornJob("30 10,15 * * *", sspaiRssServer)
+	rssScheduler := scheduler.GetSimpleScheduler()
+	err = rssScheduler.AddCornJob("30 10,15 * * *", true, "sspaiRss", sspaiRssServer)
 	if err != nil {
-		fmt.Printf("sspai rss Error:%v\n", err.Error())
+		log.Printf("sspai rss Error:%v\n", err.Error())
 		return
 	}
-	sspaiScheduler.StartAsync()
 
-	appinnScheduler := scheduler.GetSimpleScheduler()
-	err = appinnScheduler.AddCornJob("0 11,16 * * *", appinnRssServer)
+	err = rssScheduler.AddCornJob("0 11,16 * * *", false, "appinnRss", appinnRssServer)
 	if err != nil {
 		fmt.Printf("appinn rss Error:%v\n", err.Error())
 		return
 	}
-	appinnScheduler.StartAsync()
+	rssScheduler.StartAsync()
 }
 
-func sspaiRssServer() error {
+func sspaiRssServer(job gocron.Job) error {
 	var err error
 	sspaiRss := rss.Rss{}
 	err = rssRequest("https://sspai.com/feed", rss.Sspai, &sspaiRss)
@@ -40,6 +40,7 @@ func sspaiRssServer() error {
 	if err != nil {
 		return err
 	}
+	fmt.Printf("sspai rss job's last run: %s\nthis job's next run: %s", job.LastRun(), job.NextRun())
 	return nil
 }
 
@@ -73,12 +74,8 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	var err error
 	if isDingTalk {
 		// 推送到钉钉机器人
-		message := dingtalk.MessageDTO{}
-		err = setRssMessage(channel, &message, configs.DingTalkToken, "")
-		if err != nil {
-			return err
-		}
-		err = dingtalk.SendMdMessage(message)
+		message := dingtalk.MarkdownMessageDTO{}
+		err = sendRssMessage(channel, configs.DingTalkToken, "", message)
 		if err != nil {
 			return err
 		}
@@ -88,11 +85,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 		email := smtp.SimpleEmail{
 			Receiver: configs.Receiver,
 		}
-		err = setRssEmail(channel, &email)
-		if err != nil {
-			return err
-		}
-		err = smtp.SendEmail(email, configs.SmtpConfig)
+		err = sendRssEmail(channel, email)
 		if err != nil {
 			return err
 		}
@@ -100,7 +93,7 @@ func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
 	return nil
 }
 
-func setRssMessage(channel rss.Channel, message *dingtalk.MessageDTO, token string, tel string) error {
+func sendRssMessage(channel rss.Channel, token string, tel string, message dingtalk.MarkdownMessageDTO) error {
 	var err error
 	content := ""
 	templateMap := map[string]string{}
@@ -121,10 +114,14 @@ func setRssMessage(channel rss.Channel, message *dingtalk.MessageDTO, token stri
 		message.IsRemind = true
 		message.Tel = tel
 	}
+	err = dingtalk.SendMdMessage(message)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
-func setRssEmail(channel rss.Channel, email *smtp.SimpleEmail) error {
+func sendRssEmail(channel rss.Channel, email smtp.SimpleEmail) error {
 	body := ""
 	err := getEmailBody(channel, &body)
 	if err != nil {
@@ -132,6 +129,10 @@ func setRssEmail(channel rss.Channel, email *smtp.SimpleEmail) error {
 	}
 	email.Subject = channel.Title + "推送"
 	email.Html = body
+	err = smtp.SendEmail(email, configs.SmtpConfig)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

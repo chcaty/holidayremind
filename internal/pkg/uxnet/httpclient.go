@@ -1,4 +1,4 @@
-package net
+package uxnet
 
 import (
 	"bytes"
@@ -11,40 +11,53 @@ import (
 	"time"
 )
 
-var instance *http.Client
-var once sync.Once
+var client *http.Client
+var httpClient *HttpClient
+var onceClient sync.Once
+var onceHttpClient sync.Once
 
-type SimpleHttpClient struct {
+type HttpClient struct {
+	Timeout time.Duration
 }
 
-type SimpleHttpClientRequest interface {
-	Get(data RequestBaseData, response *[]byte) error
-	Post(data RequestBaseData, contentType ContentType, body any, response *[]byte) error
-	PostByJson(data RequestBaseData, body any, response *[]byte) error
+type Requester interface {
+	Get(data BaseData, response *[]byte) error
+	Post(data BaseData, contentType contentType, body any, response *[]byte) error
+	PostByJson(data BaseData, body any, response *[]byte) error
 }
 
-func (s *SimpleHttpClient) GetHttpClient() *http.Client {
-	once.Do(func() {
-		instance = &http.Client{
+// GetHttpClient 生成一个HttpClient对象
+func GetHttpClient() *HttpClient {
+	onceHttpClient.Do(func() {
+		httpClient = &HttpClient{
 			Timeout: 5 * time.Second,
 		}
 	})
-	return instance
+	return httpClient
+}
+
+func (s *HttpClient) GeClient() *http.Client {
+	onceClient.Do(func() {
+		client = &http.Client{
+			Timeout: s.Timeout,
+		}
+	})
+	return client
 }
 
 // Get http get method
-func (s *SimpleHttpClient) Get(data RequestBaseData, response *[]byte) error {
+func (s *HttpClient) Get(data BaseData, response *[]byte) error {
 	//new request
 	req, err := http.NewRequest("GET", data.Url, nil)
 	if err != nil {
 		return errors.New("new request is fail ")
 	}
 	//add params
-	setParams(data, req)
+	setParams(data.Params, req)
 	//add headers
-	setHeaders(data, req)
+	setHeaders(data.Headers, req)
 	//http client
-	client := s.GetHttpClient()
+	client := s.GeClient()
 	log.Printf("Go GET URL : %s", req.URL.String())
 
 	//傳送請求
@@ -64,7 +77,7 @@ func (s *SimpleHttpClient) Get(data RequestBaseData, response *[]byte) error {
 }
 
 // Post http post method
-func (s *SimpleHttpClient) Post(data RequestBaseData, contentType ContentType, body any, response *[]byte) error {
+func (s *HttpClient) Post(data BaseData, contentType contentType, body any, response *[]byte) error {
 	var err error
 	//add post body
 	var bodyJson []byte
@@ -79,13 +92,13 @@ func (s *SimpleHttpClient) Post(data RequestBaseData, contentType ContentType, b
 		return errors.New("new request is fail ")
 	}
 	//add params
-	setParams(data, req)
+	setParams(data.Params, req)
 	//add headers
-	setHeaders(data, req)
+	setHeaders(data.Headers, req)
 	//set Content-type
 	req.Header.Set("Content-type", string(contentType))
 	//http client
-	client := s.GetHttpClient()
+	client := s.GeClient()
 	log.Printf("Go POST URL : %s", req.URL.String())
 
 	//傳送請求
@@ -105,7 +118,7 @@ func (s *SimpleHttpClient) Post(data RequestBaseData, contentType ContentType, b
 }
 
 // PostByJson http post method with header content-type:application/json
-func (s *SimpleHttpClient) PostByJson(data RequestBaseData, body any, response *[]byte) error {
+func (s *HttpClient) PostByJson(data BaseData, body any, response *[]byte) error {
 	err := s.Post(data, Json, body, response)
 	if err != nil {
 		return err
@@ -123,24 +136,19 @@ func closeBody(body *io.ReadCloser) {
 	}(*body)
 }
 
-// GetSimpleHttpClient 生成一个SimpleHttpClient对象
-func GetSimpleHttpClient() *SimpleHttpClient {
-	return new(SimpleHttpClient)
-}
-
-func setParams(data RequestBaseData, req *http.Request) {
+func setParams(params map[string]string, req *http.Request) {
 	q := req.URL.Query()
-	if data.Params != nil {
-		for key, val := range data.Params {
+	if params != nil {
+		for key, val := range params {
 			q.Add(key, val)
 		}
 		req.URL.RawQuery = q.Encode()
 	}
 }
 
-func setHeaders(data RequestBaseData, req *http.Request) {
-	if data.Headers != nil {
-		for key, val := range data.Headers {
+func setHeaders(headers map[string]string, req *http.Request) {
+	if headers != nil {
+		for key, val := range headers {
 			req.Header.Add(key, val)
 		}
 	}

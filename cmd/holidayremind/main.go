@@ -1,10 +1,20 @@
 package main
 
-import "holidayRemind/internal/holidayremind/service"
+import (
+	"holidayRemind/internal/holidayremind/service/bingservice"
+	"holidayRemind/internal/holidayremind/service/doubanservice"
+	"holidayRemind/internal/holidayremind/service/holidayservice"
+	"holidayRemind/internal/holidayremind/service/moyuduckservice"
+	"holidayRemind/internal/holidayremind/service/rssservice"
+	"holidayRemind/internal/holidayremind/service/vvhanservice"
+)
 
 func main() {
-	service.BingService()
-	service.RssService()
-	service.HotTopService()
-	service.HolidayService()
+	bingservice.Start()
+	rssservice.Start()
+	moyuduckservice.Start()
+	holidayservice.Start()
+	doubanservice.Start()
+	vvhanservice.Start()
+	select {}
 }

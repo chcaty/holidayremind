@@ -1,4 +1,4 @@
-package service
+package holidayservice
 
 import (
 	"fmt"
@@ -8,46 +8,47 @@ import (
 	"holidayRemind/internal/holidayremind/holiday"
 	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/template"
-	"holidayRemind/internal/pkg"
+	"holidayRemind/internal/pkg/uxmap"
+	"log"
 	"time"
 )
 
-func HolidayService() {
+func Start() {
 	var err error
 	var calendar = map[string]holiday.DayProperty{}
 	err = holiday.CreateCalendar(&calendar)
 	if err != nil {
-		fmt.Printf("create Calendar Error:%v\n", err.Error())
+		log.Printf("create Calendar Error:%v", err.Error())
 		return
 	}
 	holidayScheduler := scheduler.GetSimpleScheduler()
-	err = holidayScheduler.AddCornJob("30 10 * * *", checkTomorrow, calendar)
+	err = holidayScheduler.AddCornJob("30 10 * * *", false, "holidayRemind", checkTomorrow, calendar)
 	if err != nil {
-		fmt.Printf("holidayRemind Error:%v\n", err.Error())
+		log.Printf("holidayRemind Error:%v", err.Error())
 		return
 	}
-	holidayScheduler.StartBlocking()
+	holidayScheduler.StartAsync()
 }
 
 func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	var err error
 	today := carbon.Now().ToDateString()
 	todayProp := holiday.DayProperty{}
-	err = pkg.GetMapValue(calender, today, &todayProp)
+	err = uxmap.GetMapValue(calender, today, &todayProp)
 	if err != nil {
 		return err
 	}
 	tomorrow := carbon.Tomorrow().ToDateString()
 	tomorrowProp := holiday.DayProperty{}
-	err = pkg.GetMapValue(calender, tomorrow, &tomorrowProp)
+	err = uxmap.GetMapValue(calender, tomorrow, &tomorrowProp)
 	if err != nil {
 		return err
 	}
 	if tomorrowProp.IsHoliday == tomorrowProp.IsHoliday {
 		return nil
 	}
-	message := dingtalk.MessageDTO{}
-	err = setHolidayMessage(&message, configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp)
+	message := dingtalk.MarkdownMessageDTO{}
+	err = setHolidayMessage(configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp, &message)
 	if err != nil {
 		return err
 	}
@@ -58,7 +59,7 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	return nil
 }
 
-func setHolidayMessage(message *dingtalk.MessageDTO, token string, todayFlag bool, tomorrowProp holiday.DayProperty) error {
+func setHolidayMessage(token string, todayFlag bool, tomorrowProp holiday.DayProperty, message *dingtalk.MarkdownMessageDTO) error {
 	if !todayFlag && tomorrowProp.IsHoliday {
 		workBody := ""
 		err := template.GetTemplate(&workBody, "WorkBody", template.MarkDown)
@@ -80,7 +81,7 @@ func setHolidayMessage(message *dingtalk.MessageDTO, token string, todayFlag boo
 	return nil
 }
 
-func sendDingTalkMessage(message dingtalk.MessageDTO, tomorrowFlag bool) error {
+func sendDingTalkMessage(message dingtalk.MarkdownMessageDTO, tomorrowFlag bool) error {
 	if tomorrowFlag {
 		err := dingtalk.SendMdMessage(message)
 		if err != nil {
@@ -92,9 +93,9 @@ func sendDingTalkMessage(message dingtalk.MessageDTO, tomorrowFlag bool) error {
 		now := time.Now()
 		sendTime := time.Date(now.Year(), now.Month(), now.Day(), 22, 30, 0, 0, time.Local)
 		scheduler.SetOnceCorn(&corn, sendTime)
-		err := workRemindScheduler.AddCornJob(corn, dingtalk.SendMdMessage, message)
+		err := workRemindScheduler.AddCornJob(corn, false, "workRemind", dingtalk.SendMdMessage, message)
 		if err != nil {
-			fmt.Printf("workRemind Error:%v\n", err.Error())
+			log.Printf("workRemind Error:%v", err.Error())
 		}
 		workRemindScheduler.StartAsync()
 	}

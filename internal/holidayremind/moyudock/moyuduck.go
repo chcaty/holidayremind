@@ -1,9 +1,8 @@
 package moyudock
 
 import (
-	"fmt"
-	"holidayRemind/internal/pkg"
-	"holidayRemind/internal/pkg/net"
+	uxjson "holidayRemind/internal/pkg/uxjson"
+	"holidayRemind/internal/pkg/uxnet"
 )
 
 const baseUrl = "https://api.moyuduck.com/"
@@ -35,19 +34,19 @@ func GetImage(imageInfo *Response[string]) error {
 func getRequest[T ResponseData](path string, data *T) error {
 	var err error
 	var resp []byte
-	requestData := net.RequestBaseData{
+	requestData := uxnet.BaseData{
 		Url:     baseUrl + path,
-		Headers: nil,
-		Params:  net.DefaultHeader,
+		Headers: uxnet.DefaultHeader,
+		Params:  nil,
 	}
-	client := net.GetSimpleHttpClient()
+	client := uxnet.GetHttpClient()
 	err = client.Get(requestData, &resp)
 	if err != nil {
 		return err
 	}
-	err = pkg.ToObjectByBytes(resp, data)
+	err = uxjson.ToObjectByBytes(resp, data)
 	if err != nil {
-		return fmt.Errorf("get struct fail. error: %w", err)
+		return err
 	}
 	return nil
 }

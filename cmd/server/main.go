@@ -5,13 +5,11 @@ import (
 	"holidayRemind/internal/holidayremind/service/doubanservice"
 	"holidayRemind/internal/holidayremind/service/holidayservice"
 	"holidayRemind/internal/holidayremind/service/moyuduckservice"
-	"holidayRemind/internal/holidayremind/service/rssservice"
 	"holidayRemind/internal/holidayremind/service/vvhanservice"
 )
 
 func main() {
 	bingservice.Start()
-	rssservice.Start()
 	moyuduckservice.Start()
 	holidayservice.Start()
 	doubanservice.Start()

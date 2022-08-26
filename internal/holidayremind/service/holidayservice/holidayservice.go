@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/golang-module/carbon"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/holiday"
 	"holidayRemind/internal/holidayremind/template"
+	dingtalk2 "holidayRemind/internal/pkg/dingtalk"
 	"holidayRemind/internal/pkg/scheduler"
 	"holidayRemind/internal/pkg/uxmap"
 	"log"
@@ -47,7 +47,7 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	if tomorrowProp.IsHoliday == tomorrowProp.IsHoliday {
 		return nil
 	}
-	message := dingtalk.MarkdownMessageDTO{}
+	message := dingtalk2.MarkdownMessageDTO{}
 	err = setHolidayMessage(configs.DingTalkToken, tomorrowProp.IsHoliday, tomorrowProp, &message)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ func checkTomorrow(calender map[string]holiday.DayProperty) error {
 	return nil
 }
 
-func setHolidayMessage(token string, todayFlag bool, tomorrowProp holiday.DayProperty, message *dingtalk.MarkdownMessageDTO) error {
+func setHolidayMessage(token string, todayFlag bool, tomorrowProp holiday.DayProperty, message *dingtalk2.MarkdownMessageDTO) error {
 	if !todayFlag && tomorrowProp.IsHoliday {
 		workBody := ""
 		err := template.GetTemplate(&workBody, "WorkBody", template.MarkDown)
@@ -81,9 +81,9 @@ func setHolidayMessage(token string, todayFlag bool, tomorrowProp holiday.DayPro
 	return nil
 }
 
-func sendDingTalkMessage(message dingtalk.MarkdownMessageDTO, tomorrowFlag bool) error {
+func sendDingTalkMessage(message dingtalk2.MarkdownMessageDTO, tomorrowFlag bool) error {
 	if tomorrowFlag {
-		err := dingtalk.SendMdMessage(message)
+		err := dingtalk2.SendMdMessage(message)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func sendDingTalkMessage(message dingtalk.MarkdownMessageDTO, tomorrowFlag bool)
 		now := time.Now()
 		sendTime := time.Date(now.Year(), now.Month(), now.Day(), 22, 30, 0, 0, time.Local)
 		scheduler.SetOnceCorn(&corn, sendTime)
-		err := workRemindScheduler.AddCornJob(corn, false, "workRemind", dingtalk.SendMdMessage, message)
+		err := workRemindScheduler.AddCornJob(corn, false, "workRemind", dingtalk2.SendMdMessage, message)
 		if err != nil {
 			log.Printf("workRemind Error:%v", err.Error())
 		}

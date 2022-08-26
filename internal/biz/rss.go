@@ -1,73 +1,83 @@
-package rssservice
+package biz
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/dingtalk"
-	"holidayRemind/internal/holidayremind/rss"
-	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
-	"holidayRemind/internal/pkg/scheduler"
+	"holidayRemind/internal/pkg/dingtalk"
+	"holidayRemind/internal/pkg/rss"
+	"holidayRemind/internal/pkg/smtp"
 	"log"
+	"regexp"
+	"strings"
 )
 
-func Start() {
-	var err error
-	rssScheduler := scheduler.GetScheduler()
-	err = rssScheduler.AddCornJob("30 10,15 * * *", true, "sspaiRss", sspaiRssServer)
-	if err != nil {
-		log.Printf("sspai rss Error:%v\n", err.Error())
-		return
-	}
-
-	err = rssScheduler.AddCornJob("0 11,16 * * *", false, "appinnRss", appinnRssServer)
-	if err != nil {
-		fmt.Printf("appinn rss Error:%v\n", err.Error())
-		return
-	}
-	rssScheduler.StartAsync()
+type RssUsecase struct {
 }
 
-func sspaiRssServer(job gocron.Job) error {
-	var err error
-	sspaiRss := rss.Rss{}
-	err = rssRequest("https://sspai.com/feed", rss.Sspai, &sspaiRss)
-	if err != nil {
-		return err
-	}
-	err = rssNotion(sspaiRss.Channel, true, true)
-	if err != nil {
-		return err
-	}
-	fmt.Printf("sspai rss job's last run: %s\nthis job's next run: %s", job.LastRun(), job.NextRun())
-	return nil
+func NewRssUsecase(logger log.Logger) *RssUsecase {
+	return &RssUsecase{}
 }
 
-func appinnRssServer() error {
+func (uc *RssUsecase) GetAppinnRss() error {
 	var err error
-	appinnRss := rss.Rss{}
-	err = rssRequest("https://appinn.com/feed", rss.Appinn, &appinnRss)
+	appinn := rss.Rss{}
+	err = rssRequest("https://appinn.com/feed", &appinn)
 	if err != nil {
 		return err
 	}
-	err = rssNotion(appinnRss.Channel, true, true)
+	err = rssNotion(appinn.Channel, true, true)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func rssRequest(url string, rssType rss.ChannelType, responseRss *rss.Rss) error {
-	rssData := rss.RequestData{
-		Url:         url,
-		ChannelType: rssType,
+func (uc *RssUsecase) GetSspaiRss() error {
+	var err error
+	sspai := rss.Rss{}
+	err = rssRequest("https://sspai.com/feed", &sspai)
+	if err != nil {
+		return err
 	}
-	err := rss.Request(rssData, responseRss)
+	cleanSspaiRss(&sspai.Channel)
+	err = rssNotion(sspai.Channel, true, true)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func rssRequest(url string, responseRss *rss.Rss) error {
+	err := rss.Request(url, responseRss)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func cleanZzttRss(channel *rss.Channel) {
+	for i := 0; i < len(channel.Item); i++ {
+		if channel.Item[i].Title == "黑料不打烊—精选专区" || channel.Item[i].Title == "." || channel.Item[i].Title == ".   " {
+			channel.Item = append(channel.Item[:i], channel.Item[i+1:]...)
+			// form the remove item index to start iterate next item
+			i--
+		} else {
+			reg, _ := regexp.Compile("萝莉约啪.*偷窥视频")
+			channel.Item[i].Description = reg.ReplaceAllString(channel.Item[i].Description, "")
+		}
+	}
+}
+
+func cleanSspaiRss(channel *rss.Channel) {
+	for _, item := range channel.Item {
+		reg := regexp.MustCompile(`.*<a`)
+		results := reg.FindAllString(item.Description, -1)
+		if results != nil {
+			item.Description = reg.FindAllString(item.Description, -1)[0]
+			item.Description = strings.Replace(item.Description, "<a", "", -1)
+		}
+	}
 }
 
 func rssNotion(channel rss.Channel, isDingTalk bool, isEmail bool) error {
@@ -123,7 +133,7 @@ func sendRssMessage(channel rss.Channel, token string, tel string, message dingt
 
 func sendRssEmail(channel rss.Channel, email smtp.SimpleEmail) error {
 	body := ""
-	err := getEmailBody(channel, &body)
+	err := setRssEmailBody(channel, &body)
 	if err != nil {
 		return err
 	}
@@ -136,7 +146,7 @@ func sendRssEmail(channel rss.Channel, email smtp.SimpleEmail) error {
 	return nil
 }
 
-func getEmailBody(channel rss.Channel, body *string) error {
+func setRssEmailBody(channel rss.Channel, body *string) error {
 	var err error
 	templateMap := map[string]string{}
 	err = template.GetTemplateList(&templateMap, []string{

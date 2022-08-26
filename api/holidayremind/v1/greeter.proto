@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package holidayremind.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "holidayremind/api/holidayremind/v1;v1";
+
+service Greeter {
+  rpc GetSspaiRss(SspaiRssRequest) returns(SspaiRssReply){
+
+  }
+}
+
+message SspaiRssRequest {
+
+}
+
+message SspaiRssReply {
+
+}

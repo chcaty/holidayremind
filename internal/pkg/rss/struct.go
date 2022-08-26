@@ -22,8 +22,3 @@ type Item struct {
 	Description string   `xml:"description"`
 	PubDate     string   `xml:"pubDate"`
 }
-
-type RequestData struct {
-	Url         string
-	ChannelType ChannelType
-}

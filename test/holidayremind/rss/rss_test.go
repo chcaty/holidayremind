@@ -1,7 +1,7 @@
 package rss
 
 import (
-	"holidayRemind/internal/holidayremind/rss"
+	"holidayRemind/internal/pkg/rss"
 	"testing"
 )
 

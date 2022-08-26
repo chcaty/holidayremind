@@ -2,12 +2,12 @@ package dingtalk
 
 import (
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/dingtalk"
+	dingtalk2 "holidayRemind/internal/pkg/dingtalk"
 	"testing"
 )
 
 func TestSendMdMessage(t *testing.T) {
-	message := dingtalk.MarkdownMessageDTO{
+	message := dingtalk2.MarkdownMessageDTO{
 		Title:       "test",
 		Text:        "test",
 		Token:       configs.DingTalkToken,
@@ -15,7 +15,7 @@ func TestSendMdMessage(t *testing.T) {
 		IsRemind:    false,
 		IsRemindAll: false,
 	}
-	err := dingtalk.SendMdMessage(message)
+	err := dingtalk2.SendMdMessage(message)
 	if err != nil {
 		t.Log(err)
 		return
@@ -24,11 +24,11 @@ func TestSendMdMessage(t *testing.T) {
 }
 
 func TestSendFeedCardMessage(t *testing.T) {
-	message := dingtalk.FeedCardMessageDTO{
+	message := dingtalk2.FeedCardMessageDTO{
 		Links: nil,
 		Token: configs.DingTalkToken,
 	}
-	err := dingtalk.SendFeedCardMessage(message)
+	err := dingtalk2.SendFeedCardMessage(message)
 	if err != nil {
 		t.Log(err)
 		return

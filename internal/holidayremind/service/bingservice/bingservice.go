@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/dingtalk"
-	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	dingtalk2 "holidayRemind/internal/pkg/dingtalk"
 	"holidayRemind/internal/pkg/scheduler"
+	smtp2 "holidayRemind/internal/pkg/smtp"
 	"holidayRemind/internal/pkg/uxnet"
 	"log"
 	"regexp"
@@ -95,7 +95,7 @@ func sendDingTalkMessage(imageUrl string, content string) error {
 	if err != nil {
 		return err
 	}
-	message := dingtalk.MarkdownMessageDTO{
+	message := dingtalk2.MarkdownMessageDTO{
 		Title:       "今日推送",
 		Text:        fmt.Sprintf(imageBody, "发图姬", content, imageUrl),
 		Token:       configs.DingTalkToken,
@@ -103,7 +103,7 @@ func sendDingTalkMessage(imageUrl string, content string) error {
 		IsRemind:    false,
 		IsRemindAll: false,
 	}
-	err = dingtalk.SendMdMessage(message)
+	err = dingtalk2.SendMdMessage(message)
 	if err != nil {
 		return err
 	}
@@ -117,13 +117,13 @@ func sendEmail(imageUrl string, content string) error {
 	if err != nil {
 		return err
 	}
-	bingImageEmail := smtp.SimpleEmail{
+	bingImageEmail := smtp2.SimpleEmail{
 		Subject:    "今日推送",
 		Html:       fmt.Sprintf(imageBody, "%;", "%;", content, imageUrl, "%\""),
 		Attachment: nil,
 		Receiver:   configs.Receiver,
 	}
-	err = smtp.SendEmail(bingImageEmail, configs.SmtpConfig)
+	err = smtp2.SendEmail(bingImageEmail, configs.SmtpConfig)
 	if err != nil {
 		return err
 	}

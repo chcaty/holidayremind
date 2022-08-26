@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/moyuduck"
-	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
 	"holidayRemind/internal/pkg/scheduler"
+	smtp2 "holidayRemind/internal/pkg/smtp"
 	"log"
 )
 
@@ -27,7 +27,7 @@ func weiboHotTopService() error {
 	if err != nil {
 		return err
 	}
-	email := smtp.SimpleEmail{
+	email := smtp2.SimpleEmail{
 		Receiver: configs.HotTopReceiver,
 	}
 	err = sendHotTopEmail("微博热搜榜", &hotTops.Data.Weibo, email)
@@ -37,7 +37,7 @@ func weiboHotTopService() error {
 	return nil
 }
 
-func sendHotTopEmail(title string, hotTopInfos *moyuduck.HotTopInfo, email smtp.SimpleEmail) error {
+func sendHotTopEmail(title string, hotTopInfos *moyuduck.HotTopInfo, email smtp2.SimpleEmail) error {
 	body := ""
 	err := getHotTopEmailBody(title, *hotTopInfos, &body)
 	if err != nil {
@@ -45,7 +45,7 @@ func sendHotTopEmail(title string, hotTopInfos *moyuduck.HotTopInfo, email smtp.
 	}
 	email.Subject = title + "推送"
 	email.Html = body
-	err = smtp.SendEmail(email, configs.SmtpConfig)
+	err = smtp2.SendEmail(email, configs.SmtpConfig)
 	if err != nil {
 		return err
 	}

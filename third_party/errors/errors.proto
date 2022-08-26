@@ -1,0 +1,39 @@
+// MIT License
+// Copyright (c) 2020 go-kratos
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of his software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+//SOFTWARE.
+
+syntax = "proto3";
+
+package errors;
+
+option go_package = "github.com/go-kratos/kratos/v2/errors;errors";
+option java_multiple_files = true;
+option java_package = "com.github.kratos.errors";
+option objc_class_prefix = "KratosErrors";
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.EnumOptions {
+  int32 default_code = 1108;
+}
+
+extend google.protobuf.EnumValueOptions {
+  int32 code = 1109;
+}

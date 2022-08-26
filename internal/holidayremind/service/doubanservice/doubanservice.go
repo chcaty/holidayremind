@@ -3,8 +3,8 @@ package doubanservice
 import (
 	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/douban"
+	dingtalk2 "holidayRemind/internal/pkg/dingtalk"
 	"holidayRemind/internal/pkg/scheduler"
 	"log"
 )
@@ -68,19 +68,19 @@ func chineseTvWeeklyBestService(job gocron.Job) error {
 }
 
 func sendDingTalkMessage(items []douban.CollectionItem) error {
-	var links []dingtalk.FeedCardLink
+	var links []dingtalk2.FeedCardLink
 	for _, item := range items {
-		links = append(links, dingtalk.FeedCardLink{
+		links = append(links, dingtalk2.FeedCardLink{
 			Title:      item.Title,
 			MessageUrl: item.Url,
 			PictureUrl: item.CoverUrl,
 		})
 	}
-	dto := dingtalk.FeedCardMessageDTO{
+	dto := dingtalk2.FeedCardMessageDTO{
 		Token: configs.DingTalkToken,
 		Links: links,
 	}
-	err := dingtalk.SendFeedCardMessage(dto)
+	err := dingtalk2.SendFeedCardMessage(dto)
 	if err != nil {
 		return err
 	}

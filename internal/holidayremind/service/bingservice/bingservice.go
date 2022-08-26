@@ -5,9 +5,9 @@ import (
 	"github.com/go-co-op/gocron"
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
-	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg/scheduler"
 	"holidayRemind/internal/pkg/uxnet"
 	"log"
 	"regexp"
@@ -16,18 +16,16 @@ import (
 
 func Start() {
 	var err error
-	imageScheduler := scheduler.GetSimpleScheduler()
 	randomData := scheduler.RandomData{
 		Lower: 90,
 		Upper: 180,
 		Unit:  scheduler.Minute,
 	}
-	err = imageScheduler.AddRandomJob(randomData, true, "BingImage", bingImageService)
+	err = scheduler.GetScheduler().AddRandomJob(randomData, true, "BingImage", bingImageService)
 	if err != nil {
 		log.Printf("bingservice service Error:%v", err.Error())
 		return
 	}
-	imageScheduler.StartAsync()
 }
 
 func bingImageService(job gocron.Job) error {

@@ -1,4 +1,4 @@
-package moyudock
+package moyuduck
 
 // Response 摸鱼鸭返回结果
 type Response[T string | Holiday | HotTopSite] struct {

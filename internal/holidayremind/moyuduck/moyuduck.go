@@ -1,7 +1,7 @@
-package moyudock
+package moyuduck
 
 import (
-	uxjson "holidayRemind/internal/pkg/uxjson"
+	"holidayRemind/internal/pkg/uxjson"
 	"holidayRemind/internal/pkg/uxnet"
 )
 

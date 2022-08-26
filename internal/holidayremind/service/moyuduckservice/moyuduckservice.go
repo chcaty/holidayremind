@@ -3,15 +3,15 @@ package moyuduckservice
 import (
 	"fmt"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/moyudock"
-	"holidayRemind/internal/holidayremind/scheduler"
+	"holidayRemind/internal/holidayremind/moyuduck"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg/scheduler"
 	"log"
 )
 
 func Start() {
-	hotTopScheduler := scheduler.GetSimpleScheduler()
+	hotTopScheduler := scheduler.GetScheduler()
 	err := hotTopScheduler.AddCornJob("30 10,15 * * *", false, "hotTop", weiboHotTopService)
 	if err != nil {
 		log.Printf("hotTop Error:%v\n", err.Error())
@@ -22,8 +22,8 @@ func Start() {
 
 func weiboHotTopService() error {
 	var err error
-	hotTops := moyudock.Response[moyudock.HotTopSite]{}
-	err = moyudock.GetHotTop(&hotTops)
+	hotTops := moyuduck.Response[moyuduck.HotTopSite]{}
+	err = moyuduck.GetHotTop(&hotTops)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func weiboHotTopService() error {
 	return nil
 }
 
-func sendHotTopEmail(title string, hotTopInfos *moyudock.HotTopInfo, email smtp.SimpleEmail) error {
+func sendHotTopEmail(title string, hotTopInfos *moyuduck.HotTopInfo, email smtp.SimpleEmail) error {
 	body := ""
 	err := getHotTopEmailBody(title, *hotTopInfos, &body)
 	if err != nil {
@@ -52,7 +52,7 @@ func sendHotTopEmail(title string, hotTopInfos *moyudock.HotTopInfo, email smtp.
 	return nil
 }
 
-func getHotTopEmailBody(title string, hotTopInfos moyudock.HotTopInfo, body *string) error {
+func getHotTopEmailBody(title string, hotTopInfos moyuduck.HotTopInfo, body *string) error {
 	var err error
 	templateMap := map[string]string{}
 	templateName := []string{

@@ -11,13 +11,11 @@ import (
 	"time"
 )
 
-var client *http.Client
 var httpClient *HttpClient
-var onceClient sync.Once
-var onceHttpClient sync.Once
+var once sync.Once
 
 type HttpClient struct {
-	Timeout time.Duration
+	client *http.Client
 }
 
 type Requester interface {
@@ -28,21 +26,14 @@ type Requester interface {
 
 // GetHttpClient 生成一个HttpClient对象
 func GetHttpClient() *HttpClient {
-	onceHttpClient.Do(func() {
+	once.Do(func() {
 		httpClient = &HttpClient{
-			Timeout: 5 * time.Second,
+			client: &http.Client{
+				Timeout: 5 * time.Second,
+			},
 		}
 	})
 	return httpClient
-}
-
-func (s *HttpClient) GeClient() *http.Client {
-	onceClient.Do(func() {
-		client = &http.Client{
-			Timeout: s.Timeout,
-		}
-	})
-	return client
 }
 
 // Get http get method
@@ -57,7 +48,7 @@ func (s *HttpClient) Get(data BaseData, response *[]byte) error {
 	//add headers
 	setHeaders(data.Headers, req)
 	//http client
-	client := s.GeClient()
+	client := s.client
 	log.Printf("Go GET URL : %s", req.URL.String())
 
 	//傳送請求
@@ -98,7 +89,7 @@ func (s *HttpClient) Post(data BaseData, contentType contentType, body any, resp
 	//set Content-type
 	req.Header.Set("Content-type", string(contentType))
 	//http client
-	client := s.GeClient()
+	client := s.client
 	log.Printf("Go POST URL : %s", req.URL.String())
 
 	//傳送請求

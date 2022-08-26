@@ -6,8 +6,8 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/holiday"
-	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg/scheduler"
 	"holidayRemind/internal/pkg/uxmap"
 	"log"
 	"time"
@@ -21,7 +21,7 @@ func Start() {
 		log.Printf("create Calendar Error:%v", err.Error())
 		return
 	}
-	holidayScheduler := scheduler.GetSimpleScheduler()
+	holidayScheduler := scheduler.GetScheduler()
 	err = holidayScheduler.AddCornJob("30 10 * * *", false, "holidayRemind", checkTomorrow, calendar)
 	if err != nil {
 		log.Printf("holidayRemind Error:%v", err.Error())
@@ -88,7 +88,7 @@ func sendDingTalkMessage(message dingtalk.MarkdownMessageDTO, tomorrowFlag bool)
 			return err
 		}
 	} else {
-		workRemindScheduler := scheduler.GetSimpleScheduler()
+		workRemindScheduler := scheduler.GetScheduler()
 		corn := ""
 		now := time.Now()
 		sendTime := time.Date(now.Year(), now.Month(), now.Day(), 22, 30, 0, 0, time.Local)

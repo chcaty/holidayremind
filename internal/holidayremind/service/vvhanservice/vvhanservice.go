@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"holidayRemind/configs"
-	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg/scheduler"
 	"holidayRemind/internal/pkg/uxjson"
 	"holidayRemind/internal/pkg/uxnet"
 	"log"
@@ -14,8 +14,8 @@ import (
 
 func Start() {
 	var err error
-	vvhanScheduler := scheduler.GetSimpleScheduler()
-	err = vvhanScheduler.AddCornJob("30 9 * * *", true, "vvhan", VvhanImageService)
+	vvhanScheduler := scheduler.GetScheduler()
+	err = vvhanScheduler.AddCornJob("0 10 * * *", false, "vvhan", VvhanImageService)
 	if err != nil {
 		log.Printf("vvhan service Error:%v\n", err.Error())
 		return
@@ -26,7 +26,7 @@ func Start() {
 func VvhanImageService() error {
 	var err error
 	imageUrl := ""
-	err = getMoYuImage(&imageUrl)
+	err = getCalendarImage(&imageUrl)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,8 @@ func VvhanImageService() error {
 	return nil
 }
 
-func getMoYuImage(imageUrl *string) error {
+func getCalendarImage(imageUrl *string) error {
+	var err error
 	var resp []byte
 	requestData := uxnet.BaseData{
 		Url:     "https://api.vvhan.com/api/moyu?type=json",
@@ -45,7 +46,7 @@ func getMoYuImage(imageUrl *string) error {
 		Headers: uxnet.DefaultHeader,
 	}
 	client := uxnet.GetHttpClient()
-	err := client.Get(requestData, &resp)
+	err = client.Get(requestData, &resp)
 	if err != nil {
 		return err
 	}

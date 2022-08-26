@@ -6,15 +6,15 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/rss"
-	"holidayRemind/internal/holidayremind/scheduler"
 	"holidayRemind/internal/holidayremind/smtp"
 	"holidayRemind/internal/holidayremind/template"
+	"holidayRemind/internal/pkg/scheduler"
 	"log"
 )
 
 func Start() {
 	var err error
-	rssScheduler := scheduler.GetSimpleScheduler()
+	rssScheduler := scheduler.GetScheduler()
 	err = rssScheduler.AddCornJob("30 10,15 * * *", true, "sspaiRss", sspaiRssServer)
 	if err != nil {
 		log.Printf("sspai rss Error:%v\n", err.Error())

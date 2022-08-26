@@ -5,13 +5,13 @@ import (
 	"holidayRemind/configs"
 	"holidayRemind/internal/holidayremind/dingtalk"
 	"holidayRemind/internal/holidayremind/douban"
-	"holidayRemind/internal/holidayremind/scheduler"
+	"holidayRemind/internal/pkg/scheduler"
 	"log"
 )
 
 func Start() {
 	var err error
-	doubanScheduler := scheduler.GetSimpleScheduler()
+	doubanScheduler := scheduler.GetScheduler()
 	err = doubanScheduler.AddCornJob("30 16 * * 5", true, "movieWeeklyBest", movieWeeklyBestService)
 	if err != nil {
 		log.Printf("douban movie weekly best service Error:%v\n", err.Error())
